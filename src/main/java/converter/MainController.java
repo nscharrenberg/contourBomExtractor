@@ -1,6 +1,8 @@
 package converter;
 
 import converter.database.DatabaseConnection;
+import converter.domain.Product;
+import converter.logic.OdooData;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -20,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -87,7 +90,17 @@ public class MainController implements Initializable {
 
     @FXML
     void exportAction(ActionEvent event) {
+        try {
+            if(connection.isClosed()) {
+                connection = dc.connect();
+            }
 
+            OdooData od = new OdooData(connection);
+            od.getBomLines();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorMessage("Error ", e.getMessage(), null, e);
+        }
     }
 
     /**

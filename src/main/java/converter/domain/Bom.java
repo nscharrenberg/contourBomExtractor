@@ -1,31 +1,33 @@
 package converter.domain;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Bom {
-    private int id;
+    private Integer id;
     private String code;
-    private boolean active;
+    private Boolean active;
     private String type;
-    private int productTmplId;
+    private Integer productTmplId;
     private Product product;
-    private double productQty;
-    private int productUomId;
-    private int sequence;
-    private int routingId;
+    private Double productQty;
+    private Integer productUomId;
+    private Integer sequence;
+    private Integer routingId;
     private String readyToProduce;
-    private int pickingtypeId;
-    private int companyId;
+    private Integer pickingtypeId;
+    private Integer companyId;
     private String messageLastPost;
-    private int createDid;
+    private Integer createDid;
     private String createDate;
-    private int writeUid;
+    private Integer writeUid;
     private String writeDate;
 
-    private Set<BomLine> bomLines;
+    private List<BomLine> bomLines;
 
-    public Bom(int id, String code, boolean active, String type, int productTmplId, Product product, double productQty, int productUomId, int sequence, int routingId, String readyToProduce, int pickingtypeId, int companyId, String messageLastPost, int createDid, String createDate, int writeUid, String writeDate) {
+    public Bom(Integer id, String code, Boolean active, String type, Integer productTmplId, Product product, Double productQty, Integer productUomId, Integer sequence, Integer routingId, String readyToProduce, Integer pickingtypeId, Integer companyId, String messageLastPost, Integer createDid, String createDate, Integer writeUid, String writeDate) {
         this.id = id;
         this.code = code;
         this.active = active;
@@ -44,14 +46,14 @@ public class Bom {
         this.createDate = createDate;
         this.writeUid = writeUid;
         this.writeDate = writeDate;
-        this.bomLines = new HashSet<BomLine>();
+        this.bomLines = new ArrayList<BomLine>();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -63,11 +65,11 @@ public class Bom {
         this.code = code;
     }
 
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -79,11 +81,11 @@ public class Bom {
         this.type = type;
     }
 
-    public int getProductTmplId() {
+    public Integer getProductTmplId() {
         return productTmplId;
     }
 
-    public void setProductTmplId(int productTmplId) {
+    public void setProductTmplId(Integer productTmplId) {
         this.productTmplId = productTmplId;
     }
 
@@ -95,35 +97,35 @@ public class Bom {
         this.product = product;
     }
 
-    public double getProductQty() {
+    public Double getProductQty() {
         return productQty;
     }
 
-    public void setProductQty(double productQty) {
+    public void setProductQty(Double productQty) {
         this.productQty = productQty;
     }
 
-    public int getProductUomId() {
+    public Integer getProductUomId() {
         return productUomId;
     }
 
-    public void setProductUomId(int productUomId) {
+    public void setProductUomId(Integer productUomId) {
         this.productUomId = productUomId;
     }
 
-    public int getSequence() {
+    public Integer getSequence() {
         return sequence;
     }
 
-    public void setSequence(int sequence) {
+    public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
 
-    public int getRoutingId() {
+    public Integer getRoutingId() {
         return routingId;
     }
 
-    public void setRoutingId(int routingId) {
+    public void setRoutingId(Integer routingId) {
         this.routingId = routingId;
     }
 
@@ -135,19 +137,19 @@ public class Bom {
         this.readyToProduce = readyToProduce;
     }
 
-    public int getPickingtypeId() {
+    public Integer getPickingtypeId() {
         return pickingtypeId;
     }
 
-    public void setPickingtypeId(int pickingtypeId) {
+    public void setPickingtypeId(Integer pickingtypeId) {
         this.pickingtypeId = pickingtypeId;
     }
 
-    public int getCompanyId() {
+    public Integer getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(int companyId) {
+    public void setCompanyId(Integer companyId) {
         this.companyId = companyId;
     }
 
@@ -159,11 +161,11 @@ public class Bom {
         this.messageLastPost = messageLastPost;
     }
 
-    public int getCreateDid() {
+    public Integer getCreateDid() {
         return createDid;
     }
 
-    public void setCreateDid(int createDid) {
+    public void setCreateDid(Integer createDid) {
         this.createDid = createDid;
     }
 
@@ -175,11 +177,11 @@ public class Bom {
         this.createDate = createDate;
     }
 
-    public int getWriteUid() {
+    public Integer getWriteUid() {
         return writeUid;
     }
 
-    public void setWriteUid(int writeUid) {
+    public void setWriteUid(Integer writeUid) {
         this.writeUid = writeUid;
     }
 
@@ -191,11 +193,19 @@ public class Bom {
         this.writeDate = writeDate;
     }
 
-    public Set<BomLine> getBomLines() {
+    public List<BomLine> getBomLines() {
         return bomLines;
     }
 
-    public void setBomLines(Set<BomLine> bomLines) {
+    public void setBomLines(List<BomLine> bomLines) {
         this.bomLines = bomLines;
+    }
+
+    public void addBomLine(BomLine bomLine) {
+        this.bomLines.add(bomLine);
+    }
+
+    public void removeBomLine(BomLine bomLine) {
+        this.bomLines.remove(bomLine);
     }
 }

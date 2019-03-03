@@ -2,7 +2,9 @@ package converter.domain;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Product {
@@ -20,8 +22,8 @@ public class Product {
     private Integer writeUid = null;
     private String writeDate = null;
 
-    private Set<Bom> boms;
-    private Set<BomLine> bomLines;
+    private List<Bom> boms;
+    private List<BomLine> bomLines;
 
     public Product(Integer id, String defaultCode, Boolean active, Integer productTmplId, String barcode, Double volume, Double weight, String messageLastPost, String activityDateDeadline, Integer createUid, String createDate, Integer writeUid, String writeDate) {
         this.id = id;
@@ -37,8 +39,8 @@ public class Product {
         this.createDate = createDate;
         this.writeUid = writeUid;
         this.writeDate = writeDate;
-        this.boms = new HashSet<Bom>();
-        this.bomLines = new HashSet<BomLine>();
+        this.boms = new ArrayList<>();
+        this.bomLines = new ArrayList<BomLine>();
     }
 
     public Integer getId() {
@@ -145,19 +147,35 @@ public class Product {
         this.writeDate = writeDate;
     }
 
-    public Set<Bom> getBoms() {
+    public List<Bom> getBoms() {
         return boms;
     }
 
-    public void setBoms(Set<Bom> boms) {
+    public void setBoms(List<Bom> boms) {
         this.boms = boms;
     }
 
-    public Set<BomLine> getBomLines() {
+    public List<BomLine> getBomLines() {
         return bomLines;
     }
 
-    public void setBomLines(Set<BomLine> bomLines) {
+    public void setBomLines(List<BomLine> bomLines) {
         this.bomLines = bomLines;
+    }
+
+    public void addBom(Bom bom) {
+        this.boms.add(bom);
+    }
+
+    public void removeBom(Bom bom) {
+        this.boms.remove(bom);
+    }
+
+    public void addBomLine(BomLine bomLine) {
+        this.bomLines.add(bomLine);
+    }
+
+    public void removeBomLine(BomLine bomLine) {
+        this.bomLines.remove(bomLine);
     }
 }
