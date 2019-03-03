@@ -29,12 +29,6 @@ public class DatabaseConnection {
         String url = "jdbc:" + this.driver + "://" + this.hostname + ":" + this.port + "/" + this.database;
         Connection connection = DriverManager.getConnection(url, this.user, this.password);
 
-        if(connection == null) {
-            System.out.println("Could not connect to the database");
-        } else {
-            System.out.println("Connected to the database successfully");
-        }
-
         return connection;
     }
 

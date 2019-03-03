@@ -64,6 +64,7 @@ public class MainController implements Initializable {
             connection = dc.connect();
 
             if(connection != null) {
+                showMessage(Alert.AlertType.INFORMATION, "Connected", "Database connection established", null);
                 exportExcellBtn.setDisable(false);
             }
         } catch (SQLException e) {
@@ -84,6 +85,59 @@ public class MainController implements Initializable {
         }
     }
 
+    @FXML
+    void exportAction(ActionEvent event) {
+
+    }
+
+    /**
+     * Called to initialize a controller after its root element has been
+     * completely processed.
+     *
+     * @param location  The location used to resolve relative paths for the root object, or
+     *                  <tt>null</tt> if the location is not known.
+     * @param resources The resources used to localize the root object, or <tt>null</tt> if
+     */
+    public void initialize(URL location, ResourceBundle resources) {
+        databaseTypeCombo.setItems(getDrivers());
+        databaseTypeCombo.getSelectionModel().selectFirst();
+        exportExcellBtn.setDisable(true);
+
+        portNumberListener();
+    }
+
+    /**
+     * Get all the drivers and return an ObservableList with String values.
+     * @return
+     */
+    private ObservableList<String> getDrivers() {
+        ObservableList<String> options = FXCollections.observableArrayList();
+        options.add("postgresql");
+
+        return options;
+    }
+
+    /**
+     * Make sure the databasePortTxt field only allows numbers
+     */
+    private void portNumberListener() {
+        databasePortTxt.textProperty().addListener(new ChangeListener<String>() {
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(!newValue.matches("\\d*")) {
+                    databasePortTxt.setText(newValue.replaceAll("[^\\d]", ""));
+                }
+            }
+        });
+    }
+
+
+    /**
+     * A popup window that shows up
+     * @param alertType - the alert type to use
+     * @param title - the message to be displayed on the top bar of the window
+     * @param header - the message to be displayed in a bigger font
+     * @param content - the message to be displayed as content
+     */
     private void showMessage(Alert.AlertType alertType, String title, String header, String content) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -92,6 +146,14 @@ public class MainController implements Initializable {
         alert.showAndWait();
     }
 
+
+    /**
+     * An error message popup window that shows up
+     * @param title - The message to be displayed on the top bar of the window
+     * @param header - the message to be displayed in a bigger font
+     * @param content - the message to be displayed as content
+     * @param e - the exception to be used in the stacktrace window
+     */
     private void showErrorMessage(String title, String header, String content, Exception e) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -123,45 +185,5 @@ public class MainController implements Initializable {
         alert.getDialogPane().setExpandableContent(expContent);
 
         alert.showAndWait();
-    }
-
-    private
-
-    @FXML
-    void exportAction(ActionEvent event) {
-
-    }
-
-    /**
-     * Called to initialize a controller after its root element has been
-     * completely processed.
-     *
-     * @param location  The location used to resolve relative paths for the root object, or
-     *                  <tt>null</tt> if the location is not known.
-     * @param resources The resources used to localize the root object, or <tt>null</tt> if
-     */
-    public void initialize(URL location, ResourceBundle resources) {
-        databaseTypeCombo.setItems(getDrivers());
-        databaseTypeCombo.getSelectionModel().selectFirst();
-        exportExcellBtn.setDisable(true);
-
-        portNumberListener();
-    }
-
-    private ObservableList<String> getDrivers() {
-        ObservableList<String> options = FXCollections.observableArrayList();
-        options.add("postgresql");
-
-        return options;
-    }
-
-    private void portNumberListener() {
-        databasePortTxt.textProperty().addListener(new ChangeListener<String>() {
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(!newValue.matches("\\d*")) {
-                    databasePortTxt.setText(newValue.replaceAll("[^\\d]", ""));
-                }
-            }
-        });
     }
 }
