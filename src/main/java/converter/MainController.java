@@ -2,6 +2,7 @@ package converter;
 
 import converter.database.DatabaseConnection;
 import converter.domain.Product;
+import converter.logic.ExcellWriter;
 import converter.logic.OdooData;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -15,7 +16,13 @@ import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -96,7 +103,10 @@ public class MainController implements Initializable {
             }
 
             OdooData od = new OdooData(connection);
-            od.getBomLines();
+            List<Product> products = od.getBomLines();
+
+            ExcellWriter ew = new ExcellWriter();
+            ew.write();
         } catch (Exception e) {
             e.printStackTrace();
             showErrorMessage("Error ", e.getMessage(), null, e);
