@@ -1,5 +1,6 @@
 package converter.logic;
 
+import converter.domain.Product;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ExcellWriter {
-    public void write() throws IOException {
+    public void write(String location, List<Product> products) throws IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Products");
         sheet.setColumnWidth(0, 6000);
@@ -49,13 +50,10 @@ public class ExcellWriter {
         cell.setCellValue("Noah");
         cell.setCellStyle(style);
 
-        File currentDirectory = new File(".");
-        String path = currentDirectory.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";
-
-        FileOutputStream outputStream = new FileOutputStream(fileLocation);
+        FileOutputStream outputStream = new FileOutputStream(location);
         workbook.write(outputStream);
         workbook.close();
+        outputStream.close();
     }
 
     public Map<Integer, List<String>> read(String fileLocation) throws IOException {
@@ -98,9 +96,10 @@ public class ExcellWriter {
             }
             i++;
         }
-        if (workbook != null){
-            workbook.close();
-        }
+
+        workbook.close();
+        file.close();
+
         return data;
     }
 }

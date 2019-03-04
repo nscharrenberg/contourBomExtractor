@@ -22,7 +22,7 @@ public class ExcellTest {
         fileLocation = path.substring(0, path.length() - 1) + FILE_NAME;
 
         excellWriter = new ExcellWriter();
-        excellWriter.write();
+//        excellWriter.write();
     }
 
     @Test

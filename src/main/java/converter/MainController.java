@@ -12,30 +12,26 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class MainController implements Initializable {
 
     private DatabaseConnection dc = null;
     private Connection connection = null;
+    private String fileName = "tmp";
 
     @FXML
     private ComboBox<String> databaseTypeCombo;
@@ -100,13 +96,24 @@ public class MainController implements Initializable {
         try {
             if(connection.isClosed()) {
                 connection = dc.connect();
+                exportExcellBtn.setDisable(false);
             }
 
             OdooData od = new OdooData(connection);
             List<Product> products = od.getBomLines();
 
+            File currentDirectory = new File(".");
+            String path = currentDirectory.getAbsolutePath();
+            String fileLocation = path.substring(0, path.length() - 1) + fileName +".xlsx";
             ExcellWriter ew = new ExcellWriter();
-            ew.write();
+
+            if(new File(fileLocation).exists()) {
+                showActionDialog(path, fileName, products, ew);
+            } else {
+                ew.write(fileLocation, products);
+            }
+
+            showMessage(Alert.AlertType.CONFIRMATION, "Data Exported", "All data has been exported to an excell sheet", null);
         } catch (Exception e) {
             e.printStackTrace();
             showErrorMessage("Error ", e.getMessage(), null, e);
@@ -208,5 +215,34 @@ public class MainController implements Initializable {
         alert.getDialogPane().setExpandableContent(expContent);
 
         alert.showAndWait();
+    }
+
+    private void showActionDialog(String path, String fileName, List<Product> products, ExcellWriter ew) throws IOException, ParseException {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Override File");
+        alert.setHeaderText("File already exists");
+        alert.setContentText("Do you want to override the file?");
+
+        ButtonType buttonTypeOne = new ButtonType("Yes");
+        ButtonType buttonTypeTwo = new ButtonType("No, create new file");
+        ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+        String fileLocation = path.substring(0, path.length() - 1) + fileName +".xlsx";
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeOne){
+            File file = new File(fileLocation);
+            if(file.exists()) {
+                file.delete();
+            }
+
+            ew.write(fileLocation, products);
+        } else if (result.get() == buttonTypeTwo) {
+            String newFileLocation = path.substring(0, path.length() - 1) + fileName + "_" + String.valueOf(System.currentTimeMillis() / 1000) +".xlsx";
+            ew.write(newFileLocation, products);
+        }  else {
+            alert.close();
+        }
     }
 }
