@@ -1,32 +1,56 @@
-package converter.domain;
+package com.nscharrenberg.contour.domain;
 
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "mrp_bom_line")
+@NamedQueries({
+        @NamedQuery(name = "bomLine.findAll", query = "SELECT p FROM BomLine p ORDER BY p.id ASC, p.product.id ASC, p.bom.id ASC"),
+        @NamedQuery(name = "bomLine.findById", query = "SELECT p FROM BomLine p WHERE p.id = :id ORDER BY p.id ASC, p.product.id ASC, p.bom.id ASC")
+})
 public class BomLine {
+    @Id
+    @GeneratedValue
     private int id;
-    private Product product;
-    private double productQty;
-    private int productUomId;
-    private int sequence;
-    private int routingId;
-    private Bom bom;
-    private int operationId;
-    private int createUid;
-    private String createDate;
-    private int writeUid;
-    private String writeDate;
 
-    public BomLine(int id, Product product, double productQty, int productUomId, int sequence, int routingId, Bom bom, int operationId, int createUid, String createDate, int writeUid, String writeDate) {
-        this.id = id;
-        this.product = product;
-        this.productQty = productQty;
-        this.productUomId = productUomId;
-        this.sequence = sequence;
-        this.routingId = routingId;
-        this.bom = bom;
-        this.operationId = operationId;
-        this.createUid = createUid;
-        this.createDate = createDate;
-        this.writeUid = writeUid;
-        this.writeDate = writeDate;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(name = "product_qty", nullable = false)
+    private BigDecimal productQty;
+
+    @Column(name = "product_uom_id", nullable = false)
+    private int productUomId;
+
+    @Column(name = "sequence")
+    private int sequence;
+
+    @Column(name = "routing_id")
+    private int routingId;
+
+    @ManyToOne
+    @JoinColumn(name = "bom_id", nullable = false)
+    private Bom bom;
+
+    @Column(name = "operation_id")
+    private int operationId;
+
+    @Column(name = "create_uid")
+    private int createUid;
+
+    @Column(name = "create_date")
+    private LocalDateTime createDate;
+
+    @Column(name = "write_uid")
+    private int writeUid;
+
+    @Column(name = "write_date")
+    private LocalDateTime writeDate;
+
+    public BomLine() {
     }
 
     public int getId() {
@@ -45,11 +69,11 @@ public class BomLine {
         this.product = product;
     }
 
-    public double getProductQty() {
+    public BigDecimal getProductQty() {
         return productQty;
     }
 
-    public void setProductQty(double productQty) {
+    public void setProductQty(BigDecimal productQty) {
         this.productQty = productQty;
     }
 
@@ -101,11 +125,11 @@ public class BomLine {
         this.createUid = createUid;
     }
 
-    public String getCreateDate() {
+    public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
@@ -117,11 +141,13 @@ public class BomLine {
         this.writeUid = writeUid;
     }
 
-    public String getWriteDate() {
+    public LocalDateTime getWriteDate() {
         return writeDate;
     }
 
-    public void setWriteDate(String writeDate) {
+    public void setWriteDate(LocalDateTime writeDate) {
         this.writeDate = writeDate;
     }
+
+
 }

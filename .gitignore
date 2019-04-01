@@ -109,3 +109,7 @@ fabric.properties
 .idea/*
 
 *.iml
+
+src/main/resources/META-INF/persistence.xml
+/target/*
+target/*

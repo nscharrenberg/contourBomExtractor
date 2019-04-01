@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/OdooToExcellConverter.iml" filepath="$PROJECT_DIR$/OdooToExcellConverter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/postgresqlToExcell.iml" filepath="$PROJECT_DIR$/postgresqlToExcell.iml" />
     </modules>
   </component>
 </project>

@@ -1,4 +1,4 @@
-package converter;
+package com.nscharrenberg.contour;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,10 +10,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"));
-        primaryStage.setTitle("Odoo Converter");
-        primaryStage.setScene(new Scene(root, 412, 472));
-        primaryStage.setResizable(false);
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/home.fxml"));
+        primaryStage.setTitle("Hello World");
+        primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
     }
 
