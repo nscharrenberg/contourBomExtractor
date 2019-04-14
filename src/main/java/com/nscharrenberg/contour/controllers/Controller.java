@@ -6,7 +6,9 @@ import com.jfoenix.controls.JFXTreeView;
 import com.nscharrenberg.contour.domain.Bom;
 import com.nscharrenberg.contour.domain.Product;
 import com.nscharrenberg.contour.dtos.ProductDto;
+import com.nscharrenberg.contour.repositories.ProductRepository;
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -15,10 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -42,10 +41,13 @@ public class Controller implements Initializable {
     private Stage stage;
 
     @FXML
-    private TreeView<String> messageList;
+    private TreeView messageList;
 
     @FXML
     private JFXButton exportBtn;
+
+    @FXML
+    private JFXButton importAllBtn;
 
     @FXML
     private VBox progressVbox;
@@ -57,6 +59,13 @@ public class Controller implements Initializable {
     private JFXProgressBar progressBar;
 
     @FXML
+    private TextField idTxt;
+
+    private ProductRepository pr;
+
+    private List<Product> products;
+
+    @FXML
     void exportEverythingAction(ActionEvent event) {
 
     }
@@ -66,15 +75,50 @@ public class Controller implements Initializable {
 
     }
 
-    private BiConsumer<Integer, Integer> progressUpdate ;
+    @FXML
+    void importEverythingAction(ActionEvent event) {
+        this.progressLbl.setVisible(true);
+        this.progressBar.setVisible(true);
 
-    public void setProgressUpdate(BiConsumer<Integer, Integer> progressUpdate) {
-        this.progressUpdate = progressUpdate ;
+        Task<Void> loadTask = new Task<Void>() {
+            @Override
+            protected Void call() {
+                String text = idTxt.getText();
+                String formatted = text.replaceAll(" ", "");
+
+                if(!formatted.equals("*") || !formatted.equals("0")) {
+                    products = new ArrayList<>();
+                    products.add(pr.findById(Integer.parseInt(formatted)));
+                } else {
+                    products = pr.findAll();
+                }
+
+                TreeItem result = populate(products);
+
+                Platform.runLater(() -> {
+                    messageList.setRoot(result);
+                });
+
+                return null;
+            }
+        };
+
+        loadTask.setOnSucceeded(e -> {
+            disableProgressBar();
+        });
+
+        loadTask.setOnFailed(e -> {
+            disableProgressBar();
+        });
+
+        loadTask.setOnCancelled(e -> {
+            disableProgressBar();
+        });
+
+        Thread thread = new Thread(loadTask);
+        thread.setDaemon(true);
+        thread.start();
     }
-
-    EntityManagerFactory emf;
-    EntityManager em;
-    List<Product> products;
 
     @PostConstruct
     public void init() {
@@ -82,25 +126,39 @@ public class Controller implements Initializable {
     }
 
     public Controller() {
-        this.emf = Persistence.createEntityManagerFactory("contourDB");
-        this.em = emf.createEntityManager();
+        pr = new ProductRepository();
     }
 
-    private Boolean populate() {
+    private TreeItem populate(List<Product> products) {
         ModelMapper modelMapper = new ModelMapper();
-        List<ProductDto> productDtos = new ArrayList<>(Arrays.asList(modelMapper.map(this.products, ProductDto[].class)));
+        List<ProductDto> productDtos = new ArrayList<>(Arrays.asList(modelMapper.map(products, ProductDto[].class)));
 
         ArrayList<TreeItem> treeItems = new ArrayList<>();
 
         productDtos.forEach(p -> {
             TreeItem<String> product = new TreeItem<>(p.toString());
 
+            if(p.getBoms().size() > 0) {
+                p.getBoms().forEach(b -> {
+                    if(p.getId().equals(b.getProduct().getId())) {
+                        TreeItem<String> bomItem = new TreeItem<>(b.toString());
+                        product.getChildren().add(bomItem);
+                        b.getBomLines().forEach(bbl -> {
+                            if(bbl.getBom().getId().equals(b.getId()) && bbl.getProduct().getId().equals(p.getId())) {
+                                TreeItem<String> bomLineItem = new TreeItem<>(bbl.toString());
+                                bomItem.getChildren().add(bomLineItem);
+                            }
+                        });
+                    }
+                });
+            }
+
             p.getBomLines().forEach(bl -> {
                 Bom bom = bl.getBom();
                 TreeItem<String> bomItem = new TreeItem<>(bom.toString());
                 product.getChildren().add(bomItem);
                 bom.getBomLines().forEach(bbl -> {
-                    if(bbl.getBom().equals(bom)) {
+                    if(bbl.getBom().equals(bom) && bbl.getProduct().getId().equals(p.getId())) {
                         TreeItem<String> bomLineItem = new TreeItem<>(bbl.toString());
                         bomItem.getChildren().add(bomLineItem);
                     }
@@ -112,9 +170,8 @@ public class Controller implements Initializable {
 
         TreeItem rootItem = new TreeItem<>("Products");
         rootItem.getChildren().addAll(treeItems);
-        this.messageList.setRoot(rootItem);
 
-        return true;
+        return rootItem;
     }
 
     public Stage getStage() {
@@ -135,24 +192,22 @@ public class Controller implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        progressVbox.setVisible(true);
+        this.progressLbl.setVisible(false);
+        this.progressBar.setVisible(false);
 
-        Task<Boolean> loadTask = new Task<Boolean>() {
-            @Override
-            protected Boolean call() throws Exception {
-                products = em.createNamedQuery("product.findAll", Product.class).getResultList();
-
-                return populate();
+        idTxt.setTextFormatter(new TextFormatter<Object>(c -> {
+            if(!c.getControlNewText().matches("^$|^[0-9*]+$")) {
+                return null;
+            } else {
+                return c;
             }
-        };
+        }));
+    }
 
-
-        loadTask.setOnSucceeded(e -> {
-            progressVbox.setVisible(false);
+    private void disableProgressBar() {
+        Platform.runLater(() -> {
+            this.progressLbl.setVisible(false);
+            this.progressBar.setVisible(false);
         });
-
-        Thread thread = new Thread(loadTask);
-        thread.setDaemon(true);
-        thread.start();
     }
 }

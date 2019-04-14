@@ -190,4 +190,39 @@ public class Product extends RecursiveTreeObject<Product> {
     public String toString() {
         return String.format("id:%s default_code:%s productTmplId:%s barcode:%s volume:%s weight:%s", id, defaultCode, productTmplId, barcode, volume, weight);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Product)) {
+            return false;
+        }
+
+        Product p = (Product) o;
+
+        if(
+                this.getId().equals(p.getId()) &&
+                        this.getDefaultCode().equals(p.getDefaultCode()) &&
+                        this.isActive().equals(p.isActive()) &&
+                        this.getBarcode().equals(p.getBarcode()) &&
+                        this.getProductTmplId().equals(p.getProductTmplId()) &&
+                        this.getVolume() == p.getVolume() &&
+                        this.getCreateUid().equals(p.getCreateUid()) &&
+                        this.getCreateDate().equals(p.getCreateDate()) &&
+                        this.getWriteUid().equals(p.getWriteUid()) &&
+                        this.getWriteDate().equals(p.getWriteDate()) &&
+                        this.getBomLines().size() == p.getBomLines().size() &&
+                        this.getBoms().size() == p.getBoms().size() &&
+                        this.getMessageLastPost().equals(p.getMessageLastPost()) &&
+                        this.getActivityDateDeadline().equals(p.getActivityDateDeadline()) &&
+                        this.getWeight().equals(p.getWeight())
+
+                ) {
+            return true;
+        }
+
+        return false;
+    }
 }
