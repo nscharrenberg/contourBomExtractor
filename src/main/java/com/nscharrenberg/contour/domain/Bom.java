@@ -1,5 +1,7 @@
 package com.nscharrenberg.contour.domain;
 
+import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,16 +13,16 @@ import java.util.Set;
         @NamedQuery(name = "bom.findAll", query = "SELECT p FROM Bom p ORDER BY p.id DESC, p.product.id ASC"),
         @NamedQuery(name = "bom.findById", query = "SELECT p FROM Bom p WHERE p.id = :id ORDER BY p.id ASC, p.product.id ASC")
 })
-public class Bom {
+public class Bom extends RecursiveTreeObject<Bom> {
     @Id
     @GeneratedValue
-    private int id;
+    private Integer id;
 
     @Column(name = "code")
     private String code;
 
     @Column(name = "active")
-    private boolean active;
+    private Boolean active;
 
     @Column(name = "type", nullable = false)
     private String type;
@@ -36,34 +38,34 @@ public class Bom {
     private BigDecimal productQty;
 
     @Column(name = "product_uom_id", nullable = false)
-    private int productUomId;
+    private Integer productUomId;
 
     @Column(name = "sequence")
-    private int sequence;
+    private Integer sequence;
 
     @Column(name = "routing_id")
-    private int routingId;
+    private Integer routingId;
 
     @Column(name = "ready_to_produce", nullable = false)
     private String readyToProduce;
 
     @Column(name = "picking_type_id")
-    private int pickingTypeId;
+    private Integer pickingTypeId;
 
     @Column(name = "company_id", nullable = false)
-    private int companyId;
+    private Integer companyId;
 
     @Column(name = "message_last_post")
     private LocalDateTime messageLastPost;
 
     @Column(name = "create_uid")
-    private int createUid;
+    private Integer createUid;
 
     @Column(name = "create_date")
     private LocalDateTime createDate;
 
     @Column(name = "write_uid")
-    private int writeUid;
+    private Integer writeUid;
 
     @Column(name = "write_date")
     private LocalDateTime writeDate;
@@ -74,11 +76,11 @@ public class Bom {
     public Bom() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -90,11 +92,11 @@ public class Bom {
         this.code = code;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -130,27 +132,27 @@ public class Bom {
         this.productQty = productQty;
     }
 
-    public int getProductUomId() {
+    public Integer getProductUomId() {
         return productUomId;
     }
 
-    public void setProductUomId(int productUomId) {
+    public void setProductUomId(Integer productUomId) {
         this.productUomId = productUomId;
     }
 
-    public int getSequence() {
+    public Integer getSequence() {
         return sequence;
     }
 
-    public void setSequence(int sequence) {
+    public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
 
-    public int getRoutingId() {
+    public Integer getRoutingId() {
         return routingId;
     }
 
-    public void setRoutingId(int routingId) {
+    public void setRoutingId(Integer routingId) {
         this.routingId = routingId;
     }
 
@@ -162,19 +164,19 @@ public class Bom {
         this.readyToProduce = readyToProduce;
     }
 
-    public int getPickingTypeId() {
+    public Integer getPickingTypeId() {
         return pickingTypeId;
     }
 
-    public void setPickingTypeId(int pickingTypeId) {
+    public void setPickingTypeId(Integer pickingTypeId) {
         this.pickingTypeId = pickingTypeId;
     }
 
-    public int getCompanyId() {
+    public Integer getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(int companyId) {
+    public void setCompanyId(Integer companyId) {
         this.companyId = companyId;
     }
 
@@ -186,11 +188,11 @@ public class Bom {
         this.messageLastPost = messageLastPost;
     }
 
-    public int getCreateUid() {
+    public Integer getCreateUid() {
         return createUid;
     }
 
-    public void setCreateUid(int createUid) {
+    public void setCreateUid(Integer createUid) {
         this.createUid = createUid;
     }
 
@@ -202,11 +204,11 @@ public class Bom {
         this.createDate = createDate;
     }
 
-    public int getWriteUid() {
+    public Integer getWriteUid() {
         return writeUid;
     }
 
-    public void setWriteUid(int writeUid) {
+    public void setWriteUid(Integer writeUid) {
         this.writeUid = writeUid;
     }
 
@@ -224,5 +226,10 @@ public class Bom {
 
     public void setBomLines(Set<BomLine> bomLines) {
         this.bomLines = bomLines;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("id:%s code:%s type:%s productTmplId:%s productQty:%s productUomId:%s sequence:%s routingId:%s", id, code, type, productTmplId, productQty, productUomId, sequence, routingId);
     }
 }

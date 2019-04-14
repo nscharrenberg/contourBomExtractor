@@ -1,70 +1,30 @@
-package com.nscharrenberg.contour.domain;
+package com.nscharrenberg.contour.dtos;
 
-import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import com.nscharrenberg.contour.domain.Bom;
+import com.nscharrenberg.contour.domain.BomLine;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
-@Entity
-@Table(name = "product_product")
-@NamedQueries({
-        @NamedQuery(name = "product.findAll", query = "SELECT p FROM Product p ORDER BY p.id ASC"),
-        @NamedQuery(name = "product.findById", query = "SELECT p FROM Product p WHERE p.id = :id ORDER BY p.id ASC")
-})
-public class Product extends RecursiveTreeObject<Product> {
-    @Id
-    @GeneratedValue
+public class ProductDto {
     private Integer id;
-
-    @Column(name = "default_code")
     private String defaultCode;
-
-    @Column(name = "active")
     private Boolean active;
-
-    @Column(nullable = false, name = "product_tmpl_id")
     private Integer productTmplId;
-
-    @Column(name = "barcode")
     private String barcode;
-
-    @Column(name = "volume")
     private double volume;
-
-    @Column(name = "weight")
     private BigDecimal weight;
-
-    @Column(name = "message_last_post")
     private LocalDateTime messageLastPost;
-
-    @Column(name = "activity_date_deadline")
     private Date activityDateDeadline;
-
-    @Column(name = "create_uid")
     private Integer createUid;
-
-    @Column(name = "create_date")
     private LocalDateTime createDate;
-
-    @Column(name = "write_uid")
     private Integer writeUid;
-
-    @Column(name = "write_date")
     private LocalDateTime writeDate;
 
-    @OneToMany(mappedBy = "product")
-    private Set<Bom> boms;
-
-    @OneToMany(mappedBy = "product")
-    private Set<BomLine> bomLines;
-
-    public Product() {
-    }
+    private List<BomLine> bomLines;
+    private List<Bom> boms;
 
     public Integer getId() {
         return id;
@@ -82,7 +42,7 @@ public class Product extends RecursiveTreeObject<Product> {
         this.defaultCode = defaultCode;
     }
 
-    public Boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
@@ -170,20 +130,20 @@ public class Product extends RecursiveTreeObject<Product> {
         this.writeDate = writeDate;
     }
 
-    public Set<Bom> getBoms() {
-        return boms;
-    }
-
-    public void setBoms(Set<Bom> boms) {
-        this.boms = boms;
-    }
-
-    public Set<BomLine> getBomLines() {
+    public List<BomLine> getBomLines() {
         return bomLines;
     }
 
-    public void setBomLines(Set<BomLine> bomLines) {
+    public void setBomLines(List<BomLine> bomLines) {
         this.bomLines = bomLines;
+    }
+
+    public List<Bom> getBoms() {
+        return boms;
+    }
+
+    public void setBoms(List<Bom> boms) {
+        this.boms = boms;
     }
 
     @Override
