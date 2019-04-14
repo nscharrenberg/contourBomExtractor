@@ -2,39 +2,29 @@ package com.nscharrenberg.contour.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
-import com.jfoenix.controls.JFXTreeView;
 import com.nscharrenberg.contour.domain.Bom;
 import com.nscharrenberg.contour.domain.Product;
 import com.nscharrenberg.contour.dtos.ProductDto;
+import com.nscharrenberg.contour.repositories.ExcellRepository;
 import com.nscharrenberg.contour.repositories.ProductRepository;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.BiConsumer;
 
 public class Controller implements Initializable {
 
@@ -67,7 +57,39 @@ public class Controller implements Initializable {
 
     @FXML
     void exportEverythingAction(ActionEvent event) {
+        enableOnLoading("Creating Excel file... This may take a few minutes");
+        ExcellRepository er = new ExcellRepository();
 
+        if(this.products != null && this.products.size() > 0) {
+            Task<Void> loadTask = new Task<Void>() {
+                @Override
+                protected Void call() {
+                    try {
+                        er.write(products, "products.xls");
+                        return null;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            };
+
+            loadTask.setOnSucceeded(e -> {
+                disableProgressBar();
+            });
+
+            loadTask.setOnFailed(e -> {
+                disableProgressBar();
+            });
+
+            loadTask.setOnCancelled(e -> {
+                disableProgressBar();
+            });
+
+            Thread thread = new Thread(loadTask);
+            thread.setDaemon(true);
+            thread.start();
+        }
     }
 
     @FXML
@@ -77,8 +99,7 @@ public class Controller implements Initializable {
 
     @FXML
     void importEverythingAction(ActionEvent event) {
-        this.progressLbl.setVisible(true);
-        this.progressBar.setVisible(true);
+        enableOnLoading("Loading... This may take a few minutes");
 
         Task<Void> loadTask = new Task<Void>() {
             @Override
@@ -136,7 +157,7 @@ public class Controller implements Initializable {
         ArrayList<TreeItem> treeItems = new ArrayList<>();
 
         productDtos.forEach(p -> {
-            TreeItem<String> product = new TreeItem<>(p.toString());
+            TreeItem<String> product = new TreeItem<>(String.format("Hoofdstuklijst: %s", p.toString()));
 
             if(p.getBoms().size() > 0) {
                 p.getBoms().forEach(b -> {
@@ -192,8 +213,7 @@ public class Controller implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.progressLbl.setVisible(false);
-        this.progressBar.setVisible(false);
+        disableAfterLoading();
 
         idTxt.setTextFormatter(new TextFormatter<Object>(c -> {
             if(!c.getControlNewText().matches("^$|^[0-9*]+$")) {
@@ -205,9 +225,21 @@ public class Controller implements Initializable {
     }
 
     private void disableProgressBar() {
-        Platform.runLater(() -> {
-            this.progressLbl.setVisible(false);
-            this.progressBar.setVisible(false);
-        });
+        Platform.runLater(this::disableAfterLoading);
+    }
+
+    private void enableOnLoading(String text) {
+        progressLbl.setText(text);
+        this.importAllBtn.setDisable(true);
+        this.exportBtn.setDisable(true);
+        this.progressLbl.setVisible(true);
+        this.progressBar.setVisible(true);
+    }
+
+    private void disableAfterLoading() {
+        this.importAllBtn.setDisable(false);
+        this.exportBtn.setDisable(false);
+        this.progressLbl.setVisible(false);
+        this.progressBar.setVisible(false);
     }
 }

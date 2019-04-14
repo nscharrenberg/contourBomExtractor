@@ -14,7 +14,7 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/home.fxml"));
         Parent root = fxmlLoader.load();
         ((Controller) fxmlLoader.getController()).setStage(primaryStage);
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Odoo Exporter");
         primaryStage.setScene(new Scene(root, 1280, 720));
         primaryStage.show();
     }

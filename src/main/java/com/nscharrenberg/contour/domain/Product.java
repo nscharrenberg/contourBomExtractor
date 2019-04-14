@@ -115,7 +115,7 @@ public class Product extends RecursiveTreeObject<Product> {
     }
 
     public BigDecimal getWeight() {
-        return weight;
+        return weight == null ? new BigDecimal(0.00) : weight;
     }
 
     public void setWeight(BigDecimal weight) {
