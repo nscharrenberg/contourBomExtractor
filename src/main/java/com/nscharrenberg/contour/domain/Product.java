@@ -1,8 +1,6 @@
 package com.nscharrenberg.contour.domain;
 
 import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
