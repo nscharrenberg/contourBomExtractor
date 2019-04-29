@@ -4,10 +4,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
-import com.nscharrenberg.contour.domain.*;
-import com.nscharrenberg.contour.repositories.BomRepository;
+import com.nscharrenberg.contour.domain.BillOfMaterial;
+import com.nscharrenberg.contour.domain.Bom;
+import com.nscharrenberg.contour.domain.BomLine;
+import com.nscharrenberg.contour.domain.Product;
 import com.nscharrenberg.contour.repositories.ProductRepository;
-import com.nscharrenberg.contour.repositories.TemplateRepository;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.IntStream;
 
-public class Controller implements Initializable {
+public class Controller_Products implements Initializable {
 
     private Stage stage;
 
@@ -55,19 +56,19 @@ public class Controller implements Initializable {
     @FXML
     private TextField idTxt;
 
-    private TemplateRepository pr;
+    private ProductRepository pr;
 
-    private List<Template> templates;
+    private List<Product> products;
 
     @FXML
     void exportEverythingAction(ActionEvent event) {
         enableOnLoading("Creating Excel file... This may take a few minutes");
 
-        if(this.templates != null && this.templates.size() > 0) {
+        if(this.products != null && this.products.size() > 0) {
             Task<Void> loadTask = new Task<Void>() {
                 @Override
                 protected Void call() {
-                    createBillofMaterial(templates);
+                    createBillOfMaterial(products);
                     return null;
                 }
             };
@@ -90,8 +91,6 @@ public class Controller implements Initializable {
             Thread thread = new Thread(loadTask);
             thread.setDaemon(true);
             thread.start();
-        } else {
-            runLaterSuccessDialog("Warning", "Nothing to export", "There is no information to export.");
         }
     }
 
@@ -102,7 +101,7 @@ public class Controller implements Initializable {
 
     /**
      * Populate the Treeview uppon clicking the `Import` Button.
-     * This will first check if an id has been specified or if all templates should be displayed.
+     * This will first check if an id has been specified or if all products should be displayed.
      * It'll do this while working on another Thread. This should avoid program sleeping while it's being processed.
      * @param event
      */
@@ -120,22 +119,23 @@ public class Controller implements Initializable {
 
                     if(formatted.equals("*")) {
                         try {
-                            templates = pr.findAll();
+                            products = pr.findAll();
                         } catch (Exception e) {
                             e.printStackTrace();
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
                     } else {
-                        templates = new ArrayList<>();
+                        products = new ArrayList<>();
                         try {
-                            templates.addAll(pr.findByDefaultCode(text));
+                            products.addAll(pr.findByDefaultCode(text));
                         } catch (Exception e) {
                             e.printStackTrace();
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
                     }
 
-                    TreeItem result = populateTreeView(templates);
+                    List<Product> newProducts = populate(products);
+                    TreeItem result = populateTreeView(newProducts);
 
                     Platform.runLater(() -> {
                         messageList.setRoot(result);
@@ -173,60 +173,75 @@ public class Controller implements Initializable {
 
     }
 
-    public Controller() {
-        pr = new TemplateRepository();
+    public Controller_Products() {
+        pr = new ProductRepository();
     }
 
     /**
      * Preload Boms from BomLines into product Bom.
      * This makes it easier to organize it lateron when exporting or showing on a Treeview or List.
-     * @param products the list of templates
-     * @return an updated list of templates
+     * @param products the list of products
+     * @return an updated list of products
      */
-    private List<Template> populate(List<Template> products) {
+    private List<Product> populate(List<Product> products) {
         try {
+            IntStream.range(0, products.size()).forEach(i -> {
+                Product p = products.get(i);
+
+                if(p.getBomLines().size() > 0) {
+                    List<BomLine> bomLineList = new ArrayList<>(p.getBomLines());
+                    IntStream.range(0, bomLineList.size()).forEach(bli -> {
+                        BomLine bl = bomLineList.get(bli);
+
+                        if(!p.getBoms().contains(bl.getBom())) {
+                            products.get(i).getBoms().add(bl.getBom());
+                        }
+                    });
+                }
+            });
+
             return products;
         } catch(Exception e) {
             e.printStackTrace();
             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
         }
 
+
         return null;
     }
 
     /**
      * Populate the Treeview with data, depending on the productlist.
-     * This Gets all templates, and their respective Boms and BomLines.
+     * This Gets all products, and their respective Boms and BomLines.
      * It also iterates through the BomLines and gets the Boms from each BomLine that also belongs to the product and adds it to the Bom list of the product.
      * This enables it to display it in order of Product -> Boms -> BomLine.
-     * @param templates
+     * @param products
      * @return
      */
-    private TreeItem populateTreeView(List<Template> templates) {
+    private TreeItem populateTreeView(List<Product> products) {
         try {
             ArrayList<TreeItem> treeItems = new ArrayList<>();
 
-            templates.forEach(p -> {
-                TreeItem<String> template = new TreeItem<>(String.format("Hoofdstuklijst: %s", p.toString()));
+            products.forEach(p -> {
+                TreeItem<String> product = new TreeItem<>(String.format("Hoofdstuklijst: %s", p.toString()));
 
                 if(p.getBoms().size() > 0) {
                     p.getBoms().forEach(b -> {
                         TreeItem<String> bomItem = new TreeItem<>(b.toString());
-                        template.getChildren().add(bomItem);
+                        product.getChildren().add(bomItem);
 
                         if(b.getBomLines().size() > 0) {
                             b.getBomLines().forEach(bbl -> {
-                                TreeItem<String> bomLineItem = new TreeItem<>(bbl.toString());
-                                bomItem.getChildren().add(bomLineItem);
-
-                                TreeItem<String> productItem = new TreeItem<>(bbl.getProduct().toString());
-                                bomLineItem.getChildren().add(productItem);
+                                if(bbl.getBom().getId().equals(b.getId()) && bbl.getProduct().getId().equals(p.getId())) {
+                                    TreeItem<String> bomLineItem = new TreeItem<>(bbl.toString());
+                                    bomItem.getChildren().add(bomLineItem);
+                                }
                             });
                         }
                     });
                 }
 
-                treeItems.add(template);
+                treeItems.add(product);
             });
 
             TreeItem rootItem = new TreeItem<>("Products");
@@ -302,21 +317,29 @@ public class Controller implements Initializable {
         this.progressBar.setVisible(false);
     }
 
-    private void createBillofMaterial(List<Template> templates) {
+    private void createBillOfMaterial(List<Product> products) {
         try {
-            // All Templates
-            templates.forEach(t -> {
-                // All Boms
-                if(t.getBoms().size() > 0) {
-                    t.getBoms().forEach(b -> {
-                        // Get BomLines
+            // All Products
+            products.forEach(p -> {
+                // Boms of the Product
+                if(p.getBoms().size() > 0) {
+                    p.getBoms().forEach(b -> {
                         if(b.getBomLines().size() > 0) {
-                            b.getBomLines().forEach(bl -> {
+                            BomLine fbl = Iterables.tryFind(p.getBomLines(), new Predicate<BomLine>() {
+                                @Override
+                                public boolean apply(@Nullable BomLine input) {
+                                    if(b.getBomLines().contains(input)) {
+                                        return true;
+                                    }
+
+                                    return false;
+                                }
+                            }).orNull();
+
+                            if(fbl == null) {
                                 BillOfMaterial billOfMaterial = new BillOfMaterial();
-                                billOfMaterial = populateTemplate(billOfMaterial, t);
-                                billOfMaterial = populateProduct(billOfMaterial, bl.getProduct());
+                                billOfMaterial = populateProduct(billOfMaterial, p);
                                 billOfMaterial = populateBom(billOfMaterial, b);
-                                billOfMaterial = populateBomLine(billOfMaterial, bl);
 
                                 System.out.println(billOfMaterial.toString());
                                 try {
@@ -325,10 +348,27 @@ public class Controller implements Initializable {
                                     e.printStackTrace();
                                     runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
                                 }
+                            }
+
+                            b.getBomLines().forEach(bl -> {
+                                if(bl.getBom().equals(b) && bl.getProduct().getId().equals(p.getId())) {
+                                    BillOfMaterial billOfMaterial = new BillOfMaterial();
+                                    billOfMaterial = populateProduct(billOfMaterial, p);
+                                    billOfMaterial = populateBom(billOfMaterial, b);
+                                    billOfMaterial = populateBomLine(billOfMaterial, bl);
+
+                                    System.out.println(billOfMaterial.toString());
+                                    try {
+                                        pr.createBillOfMaterial(billOfMaterial);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
+                                    }
+                                }
                             });
                         } else {
                             BillOfMaterial billOfMaterial = new BillOfMaterial();
-                            billOfMaterial = populateTemplate(billOfMaterial, t);
+                            billOfMaterial = populateProduct(billOfMaterial, p);
                             billOfMaterial = populateBom(billOfMaterial, b);
 
                             System.out.println(billOfMaterial.toString());
@@ -347,131 +387,6 @@ public class Controller implements Initializable {
         }
     }
 
-//    private void createBillOfMaterial(List<Product> products) {
-//        try {
-//            // All Products
-//            products.forEach(p -> {
-//                // Boms of the Product
-//                if(p.getBoms().size() > 0) {
-//                    p.getBoms().forEach(b -> {
-//                        if(b.getBomLines().size() > 0) {
-//                            BomLine fbl = Iterables.tryFind(p.getBomLines(), new Predicate<BomLine>() {
-//                                @Override
-//                                public boolean apply(@Nullable BomLine input) {
-//                                    if(b.getBomLines().contains(input)) {
-//                                        return true;
-//                                    }
-//
-//                                    return false;
-//                                }
-//                            }).orNull();
-//
-//                            if(fbl == null) {
-//                                BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                                billOfMaterial = populateProduct(billOfMaterial, p);
-//                                billOfMaterial = populateBom(billOfMaterial, b);
-//
-//                                System.out.println(billOfMaterial.toString());
-//                                try {
-//                                    pr.createBillOfMaterial(billOfMaterial);
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                    runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                                }
-//                            }
-//
-//                            b.getBomLines().forEach(bl -> {
-//                                if(bl.getBom().equals(b) && bl.getProduct().getId().equals(p.getId())) {
-//                                    BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                                    billOfMaterial = populateProduct(billOfMaterial, p);
-//                                    billOfMaterial = populateBom(billOfMaterial, b);
-//                                    billOfMaterial = populateBomLine(billOfMaterial, bl);
-//
-//                                    System.out.println(billOfMaterial.toString());
-//                                    try {
-//                                        pr.createBillOfMaterial(billOfMaterial);
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                        runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                                    }
-//                                }
-//                            });
-//                        } else {
-//                            BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                            billOfMaterial = populateProduct(billOfMaterial, p);
-//                            billOfMaterial = populateBom(billOfMaterial, b);
-//
-//                            System.out.println(billOfMaterial.toString());
-//                            try {
-//                                pr.createBillOfMaterial(billOfMaterial);
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                                runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                            }
-//                        }
-//                    });
-//                }
-//            });
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    /**
-     * Populate the Template part of the Bill Of Material
-     * @param billOfMaterial that needs to be populated
-     * @param t Template that is being used to populate the billOfMaterial
-     * @return the populated billOfMaterial
-     */
-    private BillOfMaterial populateTemplate(BillOfMaterial billOfMaterial, Template t) {
-        billOfMaterial.setTemplate_id(t.getId());
-        billOfMaterial.setTemplate_name(t.getName());
-        billOfMaterial.setTemplate_sequence(t.getSequence());
-        billOfMaterial.setTemplate_description(t.getDescription());
-        billOfMaterial.setTemplate_descriptionPurchase(t.getDescriptionPurchase());
-        billOfMaterial.setTemplate_descriptionSale(t.getDescriptionSale());
-        billOfMaterial.setTemplate_type(t.getType());
-        billOfMaterial.setTemplate_rental(t.getRental());
-        billOfMaterial.setTemplate_categ_id(t.getCateg_id());
-        billOfMaterial.setTemplate_listPrice(t.getListPrice());
-        billOfMaterial.setTemplate_volume(t.getVolume());
-        billOfMaterial.setTemplate_weight(t.getWeight());
-        billOfMaterial.setTemplate_saleOk(t.getSaleOk());
-        billOfMaterial.setTemplate_purchaseOk(t.getPurchaseOk());
-        billOfMaterial.setTemplate_uomId(t.getUomId());
-        billOfMaterial.setTemplate_uomPoId(t.getUomPoId());
-        billOfMaterial.setTemplate_companyId(t.getCompanyId());
-        billOfMaterial.setTemplate_active(t.getActive());
-        billOfMaterial.setTemplate_color(t.getColor());
-        billOfMaterial.setTemplate_defaultCode(t.getDefaultCode());
-        billOfMaterial.setTemplate_messageLastPost(t.getMessageLastPost());
-        billOfMaterial.setTemplate_activityDateDeadline(t.getActivityDateDeadline());
-        billOfMaterial.setTemplate_createUid(t.getCreateUid());
-        billOfMaterial.setTemplate_createDate(t.getCreateDate());
-        billOfMaterial.setTemplate_writeUid(t.getWriteUid());
-        billOfMaterial.setTemplate_writeDate(t.getWriteDate());
-        billOfMaterial.setTemplate_responsibleId(t.getResponsibleId());
-        billOfMaterial.setTemplate_saleDelay(t.getSaleDelay());
-        billOfMaterial.setTemplate_tracking(t.getTracking());
-        billOfMaterial.setTemplate_descriptionPicking(t.getDescriptionPicking());
-        billOfMaterial.setTemplate_descriptionPickingOut(t.getDescriptionPickingOut());
-        billOfMaterial.setTemplate_descriptionPickingIn(t.getDescriptionPickingIn());
-        billOfMaterial.setTemplate_purchaseMethod(t.getPurchaseMethod());
-        billOfMaterial.setTemplate_purchaseLineWarn(t.getPurchaseLineWarn());
-        billOfMaterial.setTemplate_purchaseLineWarnMsg(t.getPurchaseLineWarnMsg());
-        billOfMaterial.setTemplate_produceDelay(t.getProduceDelay());
-        billOfMaterial.setTemplate_canBeExpensed(t.getCanBeExpensed());
-        billOfMaterial.setTemplate_landedCostOk(t.getLandedCostOk());
-        billOfMaterial.setTemplate_splitMethod(t.getSplitMethod());
-        billOfMaterial.setTemplate_serviceType(t.getServiceType());
-        billOfMaterial.setTemplate_saleLineWarn(t.getSaleLineWarn());
-        billOfMaterial.setTemplate_expensePolicy(t.getExpensePolicy());
-        billOfMaterial.setTemplate_invoicePolicy(t.getInvoicePolicy());
-        billOfMaterial.setTemplate_serviceTracking(t.getServiceTracking());
-
-        return billOfMaterial;
-    }
-
     /**
      * Populate the Product part of the BillOfMaterial
      * @param billOfMaterial BillOfMaterial that needs to be populated
@@ -482,6 +397,7 @@ public class Controller implements Initializable {
         billOfMaterial.setProduct_id(p.getId());
         billOfMaterial.setProduct_defaultCode(p.getDefaultCode());
         billOfMaterial.setProduct_active(p.isActive());
+//        billOfMaterial.setProduct_productTmplId(p.getProductTmplId());
         billOfMaterial.setProduct_barcode(p.getBarcode());
         billOfMaterial.setProduct_volume(p.getVolume());
         billOfMaterial.setProduct_weight(p.getWeight());
@@ -506,6 +422,7 @@ public class Controller implements Initializable {
         billOfMaterial.setBom_code(b.getCode());
         billOfMaterial.setBom_active(b.isActive());
         billOfMaterial.setBom_type(b.getType());
+//        billOfMaterial.setBom_productTmplId(b.getProductTmplId());
         billOfMaterial.setBom_productQty(b.getProductQty());
         billOfMaterial.setBom_productUomId(b.getProductUomId());
         billOfMaterial.setBom_sequence(b.getSequence());

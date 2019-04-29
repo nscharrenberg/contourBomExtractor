@@ -5,13 +5,15 @@ import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "mrp_bom")
 @NamedQueries({
         @NamedQuery(name = "bom.findAll", query = "SELECT p FROM Bom p ORDER BY p.id DESC, p.product.id ASC"),
-        @NamedQuery(name = "bom.findById", query = "SELECT p FROM Bom p WHERE p.id = :id ORDER BY p.id ASC, p.product.id ASC")
+        @NamedQuery(name = "bom.findById", query = "SELECT p FROM Bom p WHERE p.id = :id ORDER BY p.id ASC, p.product.id ASC"),
+        @NamedQuery(name = "bom.findByDefaultCode", query = "SELECT p FROM Bom p WHERE p.productTmplId.defaultCode = :defaultCode ORDER BY p.id ASC, p.product.id ASC")
 })
 public class Bom extends RecursiveTreeObject<Bom> {
     @Id
@@ -27,8 +29,9 @@ public class Bom extends RecursiveTreeObject<Bom> {
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "product_tmpl_id", nullable = false)
-    private String productTmplId;
+    @ManyToOne
+    @JoinColumn(name = "product_tmpl_id")
+    private Template productTmplId;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -108,11 +111,15 @@ public class Bom extends RecursiveTreeObject<Bom> {
         this.type = type;
     }
 
-    public String getProductTmplId() {
+    public Boolean getActive() {
+        return active;
+    }
+
+    public Template getProductTmplId() {
         return productTmplId;
     }
 
-    public void setProductTmplId(String productTmplId) {
+    public void setProductTmplId(Template productTmplId) {
         this.productTmplId = productTmplId;
     }
 
@@ -228,8 +235,45 @@ public class Bom extends RecursiveTreeObject<Bom> {
         this.bomLines = bomLines;
     }
 
+
+
     @Override
     public String toString() {
-        return String.format("id:%s code:%s type:%s productTmplId:%s productQty:%s productUomId:%s sequence:%s routingId:%s", id, code, type, productTmplId, productQty, productUomId, sequence, routingId);
+        return "Bom{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bom bom = (Bom) o;
+        return Objects.equals(id, bom.id) &&
+                Objects.equals(code, bom.code) &&
+                Objects.equals(active, bom.active) &&
+                Objects.equals(type, bom.type) &&
+                Objects.equals(productTmplId, bom.productTmplId) &&
+                Objects.equals(product, bom.product) &&
+                Objects.equals(productQty, bom.productQty) &&
+                Objects.equals(productUomId, bom.productUomId) &&
+                Objects.equals(sequence, bom.sequence) &&
+                Objects.equals(routingId, bom.routingId) &&
+                Objects.equals(readyToProduce, bom.readyToProduce) &&
+                Objects.equals(pickingTypeId, bom.pickingTypeId) &&
+                Objects.equals(companyId, bom.companyId) &&
+                Objects.equals(messageLastPost, bom.messageLastPost) &&
+                Objects.equals(createUid, bom.createUid) &&
+                Objects.equals(createDate, bom.createDate) &&
+                Objects.equals(writeUid, bom.writeUid) &&
+                Objects.equals(writeDate, bom.writeDate) &&
+                Objects.equals(bomLines, bom.bomLines);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, code, active, type, productTmplId, product, productQty, productUomId, sequence, routingId, readyToProduce, pickingTypeId, companyId, messageLastPost, createUid, createDate, writeUid, writeDate, bomLines);
     }
 }

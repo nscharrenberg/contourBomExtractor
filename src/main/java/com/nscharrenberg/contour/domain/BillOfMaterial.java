@@ -4,19 +4,157 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "stuklijst")
 public class BillOfMaterial {
     @Id
-    @SequenceGenerator(name="stuklijst_column_id_seq",
-            sequenceName="stuklijst_column_id_seq",
+    @SequenceGenerator(name="stuklijst_id_seq",
+            sequenceName="stuklijst_id_seq",
             allocationSize=1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="stuklijst_column_id_seq")
-    @Column(name = "column_id", updatable=false)
-    private Integer column_id;
+            generator="stuklijst_id_seq")
+    @Column(name = "stuklijst_id", updatable=false)
+    private Integer stuklijst_id;
+
+    /**
+     * Template Properties
+     */
+    @Column(name = "template_id")
+    private Integer template_id;
+
+    @Column(name = "template_name")
+    private String template_name;
+
+    @Column(name = "template_sequence")
+    private Integer template_sequence;
+
+    @Column(name = "template_description")
+    private String template_description;
+
+    @Column(name = "template_description_purchase")
+    private String template_descriptionPurchase;
+
+    @Column(name = "template_description_sale")
+    private String template_descriptionSale;
+
+    @Column(name = "template_type")
+    private String template_type;
+
+    @Column(name = "template_rental")
+    private Boolean template_rental;
+
+    @Column(name = "template_categ_id")
+    private Integer template_categ_id;
+
+    @Column(name = "template_list_price")
+    private BigDecimal template_listPrice;
+
+    @Column(name = "template_volume")
+    private Double template_volume;
+
+    @Column(name = "template_weight")
+    private BigDecimal template_weight;
+
+    @Column(name = "template_sale_ok")
+    private Boolean template_saleOk;
+
+    @Column(name = "template_purchase_ok")
+    private Boolean template_purchaseOk;
+
+    @Column(name = "template_uom_id")
+    private Integer template_uomId;
+
+    @Column(name = "template_uom_po_id")
+    private Integer template_uomPoId;
+
+    @Column(name = "template_company_id")
+    private Integer template_companyId;
+
+    @Column(name = "template_active")
+    private Boolean template_active;
+
+    @Column(name = "template_color")
+    private Integer template_color;
+
+    @Column(name = "template_default_code")
+    private String template_defaultCode;
+
+    @Column(name = "template_message_last_post")
+    private LocalDateTime template_messageLastPost;
+
+    @Column(name = "template_activity_date_deadline")
+    private Date template_activityDateDeadline;
+
+    @Column(name = "template_create_uid")
+    private Integer template_createUid;
+
+    @Column(name = "template_create_date")
+    private LocalDateTime template_createDate;
+
+    @Column(name = "template_write_uid")
+    private Integer template_writeUid;
+
+    @Column(name = "template_write_date")
+    private LocalDateTime template_writeDate;
+
+    @Column(name = "template_responsible_id")
+    private Integer template_responsibleId;
+
+    @Column(name = "template_sale_delay")
+    private Double template_saleDelay;
+
+    @Column(name = "template_tracking")
+    private String template_tracking;
+
+    @Column(name = "template_description_picking")
+    private String template_descriptionPicking;
+
+    @Column(name = "template_description_pickingout")
+    private String template_descriptionPickingOut;
+
+    @Column(name = "template_description_pickingin")
+    private String template_descriptionPickingIn;
+
+    @Column(name = "template_purchase_method")
+    private String template_purchaseMethod;
+
+    @Column(name = "template_purchase_line_warn")
+    private String template_purchaseLineWarn;
+
+    @Column(name = "template_purchase_line_warn_msg")
+    private String template_purchaseLineWarnMsg;
+
+    @Column(name = "template_produce_delay")
+    private Double template_produceDelay;
+
+    @Column(name = "template_can_be_expensed")
+    private Boolean template_canBeExpensed;
+
+    @Column(name = "template_landed_cost_ok")
+    private Boolean template_landedCostOk;
+
+    @Column(name = "template_split_method")
+    private String template_splitMethod;
+
+    @Column(name = "template_service_type")
+    private String template_serviceType;
+
+    @Column(name = "template_sale_line_warn")
+    private String template_saleLineWarn;
+
+    @Column(name = "template_sale_line_warn_msg")
+    private String template_saleLineWarnMsg;
+
+    @Column(name = "template_expense_policy")
+    private String template_expensePolicy;
+
+    @Column(name = "template_invoice_policy")
+    private String template_invoicePolicy;
+
+    @Column(name = "template_service_tracking")
+    private String template_serviceTracking;
+
 
     /**
      * Product Properties
@@ -24,14 +162,11 @@ public class BillOfMaterial {
     @Column(name = "product_id")
     private Integer product_id;
 
-    @Column(name = "product_product_default_code")
+    @Column(name = "product_default_code")
     private String product_defaultCode;
 
     @Column(name = "product_active")
     private Boolean product_active;
-
-    @Column(name = "product_product_tmpl_id")
-    private Integer product_productTmplId;
 
     @Column(name = "product_barcode")
     private String product_barcode;
@@ -74,9 +209,6 @@ public class BillOfMaterial {
 
     @Column(name = "bom_type")
     private String bom_type;
-
-    @Column(name = "bom_product_tmpl_id")
-    private String bom_productTmplId;
 
     @Column(name = "bom_product_qty")
     private BigDecimal bom_productQty;
@@ -150,12 +282,12 @@ public class BillOfMaterial {
     public BillOfMaterial() {
     }
 
-    public Integer getColumn_id() {
-        return column_id;
+    public Integer getStuklijst_id() {
+        return stuklijst_id;
     }
 
-    public void setColumn_id(Integer column_id) {
-        this.column_id = column_id;
+    public void setStuklijst_id(Integer column_id) {
+        this.stuklijst_id = column_id;
     }
 
     public Integer getProduct_id() {
@@ -180,14 +312,6 @@ public class BillOfMaterial {
 
     public void setProduct_active(Boolean product_active) {
         this.product_active = product_active;
-    }
-
-    public Integer getProduct_productTmplId() {
-        return product_productTmplId;
-    }
-
-    public void setProduct_productTmplId(Integer product_productTmplId) {
-        this.product_productTmplId = product_productTmplId;
     }
 
     public String getProduct_barcode() {
@@ -292,14 +416,6 @@ public class BillOfMaterial {
 
     public void setBom_type(String bom_type) {
         this.bom_type = bom_type;
-    }
-
-    public String getBom_productTmplId() {
-        return bom_productTmplId;
-    }
-
-    public void setBom_productTmplId(String bom_productTmplId) {
-        this.bom_productTmplId = bom_productTmplId;
     }
 
     public BigDecimal getBom_productQty() {
@@ -478,14 +594,418 @@ public class BillOfMaterial {
         this.bomline_writeDate = bomline_writeDate;
     }
 
+    public Integer getTemplate_id() {
+        return template_id;
+    }
+
+    public void setTemplate_id(Integer template_id) {
+        this.template_id = template_id;
+    }
+
+    public String getTemplate_name() {
+        return template_name;
+    }
+
+    public void setTemplate_name(String template_name) {
+        this.template_name = template_name;
+    }
+
+    public Integer getTemplate_sequence() {
+        return template_sequence;
+    }
+
+    public void setTemplate_sequence(Integer template_sequence) {
+        this.template_sequence = template_sequence;
+    }
+
+    public String getTemplate_description() {
+        return template_description;
+    }
+
+    public void setTemplate_description(String template_description) {
+        this.template_description = template_description;
+    }
+
+    public String getTemplate_descriptionPurchase() {
+        return template_descriptionPurchase;
+    }
+
+    public void setTemplate_descriptionPurchase(String template_descriptionPurchase) {
+        this.template_descriptionPurchase = template_descriptionPurchase;
+    }
+
+    public String getTemplate_descriptionSale() {
+        return template_descriptionSale;
+    }
+
+    public void setTemplate_descriptionSale(String template_descriptionSale) {
+        this.template_descriptionSale = template_descriptionSale;
+    }
+
+    public String getTemplate_type() {
+        return template_type;
+    }
+
+    public void setTemplate_type(String template_type) {
+        this.template_type = template_type;
+    }
+
+    public Boolean getTemplate_rental() {
+        return template_rental;
+    }
+
+    public void setTemplate_rental(Boolean template_rental) {
+        this.template_rental = template_rental;
+    }
+
+    public Integer getTemplate_categ_id() {
+        return template_categ_id;
+    }
+
+    public void setTemplate_categ_id(Integer template_categ_id) {
+        this.template_categ_id = template_categ_id;
+    }
+
+    public BigDecimal getTemplate_listPrice() {
+        return template_listPrice;
+    }
+
+    public void setTemplate_listPrice(BigDecimal template_listPrice) {
+        this.template_listPrice = template_listPrice;
+    }
+
+    public Double getTemplate_volume() {
+        return template_volume;
+    }
+
+    public void setTemplate_volume(Double template_volume) {
+        this.template_volume = template_volume;
+    }
+
+    public BigDecimal getTemplate_weight() {
+        return template_weight;
+    }
+
+    public void setTemplate_weight(BigDecimal template_weight) {
+        this.template_weight = template_weight;
+    }
+
+    public Boolean getTemplate_saleOk() {
+        return template_saleOk;
+    }
+
+    public void setTemplate_saleOk(Boolean template_saleOk) {
+        this.template_saleOk = template_saleOk;
+    }
+
+    public Boolean getTemplate_purchaseOk() {
+        return template_purchaseOk;
+    }
+
+    public void setTemplate_purchaseOk(Boolean template_purchaseOk) {
+        this.template_purchaseOk = template_purchaseOk;
+    }
+
+    public Integer getTemplate_uomId() {
+        return template_uomId;
+    }
+
+    public void setTemplate_uomId(Integer template_uomId) {
+        this.template_uomId = template_uomId;
+    }
+
+    public Integer getTemplate_uomPoId() {
+        return template_uomPoId;
+    }
+
+    public void setTemplate_uomPoId(Integer template_uomPoId) {
+        this.template_uomPoId = template_uomPoId;
+    }
+
+    public Integer getTemplate_companyId() {
+        return template_companyId;
+    }
+
+    public void setTemplate_companyId(Integer template_companyId) {
+        this.template_companyId = template_companyId;
+    }
+
+    public Boolean getTemplate_active() {
+        return template_active;
+    }
+
+    public void setTemplate_active(Boolean template_active) {
+        this.template_active = template_active;
+    }
+
+    public Integer getTemplate_color() {
+        return template_color;
+    }
+
+    public void setTemplate_color(Integer template_color) {
+        this.template_color = template_color;
+    }
+
+    public String getTemplate_defaultCode() {
+        return template_defaultCode;
+    }
+
+    public void setTemplate_defaultCode(String template_defaultCode) {
+        this.template_defaultCode = template_defaultCode;
+    }
+
+    public LocalDateTime getTemplate_messageLastPost() {
+        return template_messageLastPost;
+    }
+
+    public void setTemplate_messageLastPost(LocalDateTime template_messageLastPost) {
+        this.template_messageLastPost = template_messageLastPost;
+    }
+
+    public Date getTemplate_activityDateDeadline() {
+        return template_activityDateDeadline;
+    }
+
+    public void setTemplate_activityDateDeadline(Date template_activityDateDeadline) {
+        this.template_activityDateDeadline = template_activityDateDeadline;
+    }
+
+    public Integer getTemplate_createUid() {
+        return template_createUid;
+    }
+
+    public void setTemplate_createUid(Integer template_createUid) {
+        this.template_createUid = template_createUid;
+    }
+
+    public LocalDateTime getTemplate_createDate() {
+        return template_createDate;
+    }
+
+    public void setTemplate_createDate(LocalDateTime template_createDate) {
+        this.template_createDate = template_createDate;
+    }
+
+    public Integer getTemplate_writeUid() {
+        return template_writeUid;
+    }
+
+    public void setTemplate_writeUid(Integer template_writeUid) {
+        this.template_writeUid = template_writeUid;
+    }
+
+    public LocalDateTime getTemplate_writeDate() {
+        return template_writeDate;
+    }
+
+    public void setTemplate_writeDate(LocalDateTime template_writeDate) {
+        this.template_writeDate = template_writeDate;
+    }
+
+    public Integer getTemplate_responsibleId() {
+        return template_responsibleId;
+    }
+
+    public void setTemplate_responsibleId(Integer template_responsibleId) {
+        this.template_responsibleId = template_responsibleId;
+    }
+
+    public Double getTemplate_saleDelay() {
+        return template_saleDelay;
+    }
+
+    public void setTemplate_saleDelay(Double template_saleDelay) {
+        this.template_saleDelay = template_saleDelay;
+    }
+
+    public String getTemplate_tracking() {
+        return template_tracking;
+    }
+
+    public void setTemplate_tracking(String template_tracking) {
+        this.template_tracking = template_tracking;
+    }
+
+    public String getTemplate_descriptionPicking() {
+        return template_descriptionPicking;
+    }
+
+    public void setTemplate_descriptionPicking(String template_descriptionPicking) {
+        this.template_descriptionPicking = template_descriptionPicking;
+    }
+
+    public String getTemplate_descriptionPickingOut() {
+        return template_descriptionPickingOut;
+    }
+
+    public void setTemplate_descriptionPickingOut(String template_descriptionPickingOut) {
+        this.template_descriptionPickingOut = template_descriptionPickingOut;
+    }
+
+    public String getTemplate_descriptionPickingIn() {
+        return template_descriptionPickingIn;
+    }
+
+    public void setTemplate_descriptionPickingIn(String template_descriptionPickingIn) {
+        this.template_descriptionPickingIn = template_descriptionPickingIn;
+    }
+
+    public String getTemplate_purchaseMethod() {
+        return template_purchaseMethod;
+    }
+
+    public void setTemplate_purchaseMethod(String template_purchaseMethod) {
+        this.template_purchaseMethod = template_purchaseMethod;
+    }
+
+    public String getTemplate_purchaseLineWarn() {
+        return template_purchaseLineWarn;
+    }
+
+    public void setTemplate_purchaseLineWarn(String template_purchaseLineWarn) {
+        this.template_purchaseLineWarn = template_purchaseLineWarn;
+    }
+
+    public String getTemplate_purchaseLineWarnMsg() {
+        return template_purchaseLineWarnMsg;
+    }
+
+    public void setTemplate_purchaseLineWarnMsg(String template_purchaseLineWarnMsg) {
+        this.template_purchaseLineWarnMsg = template_purchaseLineWarnMsg;
+    }
+
+    public Double getTemplate_produceDelay() {
+        return template_produceDelay;
+    }
+
+    public void setTemplate_produceDelay(Double template_produceDelay) {
+        this.template_produceDelay = template_produceDelay;
+    }
+
+    public Boolean getTemplate_canBeExpensed() {
+        return template_canBeExpensed;
+    }
+
+    public void setTemplate_canBeExpensed(Boolean template_canBeExpensed) {
+        this.template_canBeExpensed = template_canBeExpensed;
+    }
+
+    public Boolean getTemplate_landedCostOk() {
+        return template_landedCostOk;
+    }
+
+    public void setTemplate_landedCostOk(Boolean template_landedCostOk) {
+        this.template_landedCostOk = template_landedCostOk;
+    }
+
+    public String getTemplate_splitMethod() {
+        return template_splitMethod;
+    }
+
+    public void setTemplate_splitMethod(String template_splitMethod) {
+        this.template_splitMethod = template_splitMethod;
+    }
+
+    public String getTemplate_serviceType() {
+        return template_serviceType;
+    }
+
+    public void setTemplate_serviceType(String template_serviceType) {
+        this.template_serviceType = template_serviceType;
+    }
+
+    public String getTemplate_saleLineWarn() {
+        return template_saleLineWarn;
+    }
+
+    public void setTemplate_saleLineWarn(String template_saleLineWarn) {
+        this.template_saleLineWarn = template_saleLineWarn;
+    }
+
+    public String getTemplate_saleLineWarnMsg() {
+        return template_saleLineWarnMsg;
+    }
+
+    public void setTemplate_saleLineWarnMsg(String template_saleLineWarnMsg) {
+        this.template_saleLineWarnMsg = template_saleLineWarnMsg;
+    }
+
+    public String getTemplate_expensePolicy() {
+        return template_expensePolicy;
+    }
+
+    public void setTemplate_expensePolicy(String template_expensePolicy) {
+        this.template_expensePolicy = template_expensePolicy;
+    }
+
+    public String getTemplate_invoicePolicy() {
+        return template_invoicePolicy;
+    }
+
+    public void setTemplate_invoicePolicy(String template_invoicePolicy) {
+        this.template_invoicePolicy = template_invoicePolicy;
+    }
+
+    public String getTemplate_serviceTracking() {
+        return template_serviceTracking;
+    }
+
+    public void setTemplate_serviceTracking(String template_serviceTracking) {
+        this.template_serviceTracking = template_serviceTracking;
+    }
+
     @Override
     public String toString() {
         return "BillOfMaterial{" +
-                "column_id=" + column_id +
+                "column_id=" + stuklijst_id +
+                ", template_id=" + template_id +
+                ", template_name='" + template_name + '\'' +
+                ", template_sequence=" + template_sequence +
+                ", template_description='" + template_description + '\'' +
+                ", template_descriptionPurchase='" + template_descriptionPurchase + '\'' +
+                ", template_descriptionSale='" + template_descriptionSale + '\'' +
+                ", template_type='" + template_type + '\'' +
+                ", template_rental=" + template_rental +
+                ", template_categ_id=" + template_categ_id +
+                ", template_listPrice=" + template_listPrice +
+                ", template_volume=" + template_volume +
+                ", template_weight=" + template_weight +
+                ", template_saleOk=" + template_saleOk +
+                ", template_purchaseOk=" + template_purchaseOk +
+                ", template_uomId=" + template_uomId +
+                ", template_uomPoId=" + template_uomPoId +
+                ", template_companyId=" + template_companyId +
+                ", template_active=" + template_active +
+                ", template_color=" + template_color +
+                ", template_defaultCode='" + template_defaultCode + '\'' +
+                ", template_messageLastPost=" + template_messageLastPost +
+                ", template_activityDateDeadline=" + template_activityDateDeadline +
+                ", template_createUid=" + template_createUid +
+                ", template_createDate=" + template_createDate +
+                ", template_writeUid=" + template_writeUid +
+                ", template_writeDate=" + template_writeDate +
+                ", template_responsibleId=" + template_responsibleId +
+                ", template_saleDelay=" + template_saleDelay +
+                ", template_tracking='" + template_tracking + '\'' +
+                ", template_descriptionPicking='" + template_descriptionPicking + '\'' +
+                ", template_descriptionPickingOut='" + template_descriptionPickingOut + '\'' +
+                ", template_descriptionPickingIn='" + template_descriptionPickingIn + '\'' +
+                ", template_purchaseMethod='" + template_purchaseMethod + '\'' +
+                ", template_purchaseLineWarn='" + template_purchaseLineWarn + '\'' +
+                ", template_purchaseLineWarnMsg='" + template_purchaseLineWarnMsg + '\'' +
+                ", template_produceDelay=" + template_produceDelay +
+                ", template_canBeExpensed=" + template_canBeExpensed +
+                ", template_landedCostOk=" + template_landedCostOk +
+                ", template_splitMethod='" + template_splitMethod + '\'' +
+                ", template_serviceType='" + template_serviceType + '\'' +
+                ", template_saleLineWarn='" + template_saleLineWarn + '\'' +
+                ", template_saleLineWarnMsg='" + template_saleLineWarnMsg + '\'' +
+                ", template_expensePolicy='" + template_expensePolicy + '\'' +
+                ", template_invoicePolicy='" + template_invoicePolicy + '\'' +
+                ", template_serviceTracking='" + template_serviceTracking + '\'' +
                 ", product_id=" + product_id +
                 ", product_defaultCode='" + product_defaultCode + '\'' +
                 ", product_active=" + product_active +
-                ", product_productTmplId=" + product_productTmplId +
                 ", product_barcode='" + product_barcode + '\'' +
                 ", product_volume=" + product_volume +
                 ", product_weight=" + product_weight +
@@ -499,7 +1019,6 @@ public class BillOfMaterial {
                 ", bom_code='" + bom_code + '\'' +
                 ", bom_active=" + bom_active +
                 ", bom_type='" + bom_type + '\'' +
-                ", bom_productTmplId='" + bom_productTmplId + '\'' +
                 ", bom_productQty=" + bom_productQty +
                 ", bom_productUomId=" + bom_productUomId +
                 ", bom_sequence=" + bom_sequence +

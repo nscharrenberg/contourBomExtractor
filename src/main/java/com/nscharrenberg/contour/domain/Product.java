@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -26,8 +27,9 @@ public class Product extends RecursiveTreeObject<Product> {
     @Column(name = "active")
     private Boolean active;
 
-    @Column(nullable = false, name = "product_tmpl_id")
-    private Integer productTmplId;
+    @ManyToOne
+    @JoinColumn(name = "product_tmpl_id")
+    private Template productTmplId;
 
     @Column(name = "barcode")
     private String barcode;
@@ -89,11 +91,15 @@ public class Product extends RecursiveTreeObject<Product> {
         this.active = active;
     }
 
-    public Integer getProductTmplId() {
+    public Boolean getActive() {
+        return active;
+    }
+
+    public Template getProductTmplId() {
         return productTmplId;
     }
 
-    public void setProductTmplId(Integer productTmplId) {
+    public void setProductTmplId(Template productTmplId) {
         this.productTmplId = productTmplId;
     }
 
@@ -187,41 +193,40 @@ public class Product extends RecursiveTreeObject<Product> {
 
     @Override
     public String toString() {
-        return String.format("id:%s default_code:%s productTmplId:%s barcode:%s volume:%s weight:%s", id, defaultCode, productTmplId, barcode, volume, weight);
+        return "Product{" +
+                "id=" + id +
+                ", defaultCode='" + defaultCode + '\'' +
+                ", productTmplId=" + productTmplId.getDefaultCode() +
+                ", barcode='" + barcode + '\'' +
+                ", volume=" + volume +
+                ", weight=" + weight +
+                '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof Product)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Double.compare(product.volume, volume) == 0 &&
+                Objects.equals(id, product.id) &&
+                Objects.equals(defaultCode, product.defaultCode) &&
+                Objects.equals(active, product.active) &&
+                Objects.equals(productTmplId, product.productTmplId) &&
+                Objects.equals(barcode, product.barcode) &&
+                Objects.equals(weight, product.weight) &&
+                Objects.equals(messageLastPost, product.messageLastPost) &&
+                Objects.equals(activityDateDeadline, product.activityDateDeadline) &&
+                Objects.equals(createUid, product.createUid) &&
+                Objects.equals(createDate, product.createDate) &&
+                Objects.equals(writeUid, product.writeUid) &&
+                Objects.equals(writeDate, product.writeDate) &&
+                Objects.equals(boms, product.boms) &&
+                Objects.equals(bomLines, product.bomLines);
+    }
 
-        Product p = (Product) o;
-
-        if(
-                this.getId().equals(p.getId()) &&
-                        this.getDefaultCode().equals(p.getDefaultCode()) &&
-                        this.isActive().equals(p.isActive()) &&
-                        this.getBarcode().equals(p.getBarcode()) &&
-                        this.getProductTmplId().equals(p.getProductTmplId()) &&
-                        this.getVolume() == p.getVolume() &&
-                        this.getCreateUid().equals(p.getCreateUid()) &&
-                        this.getCreateDate().equals(p.getCreateDate()) &&
-                        this.getWriteUid().equals(p.getWriteUid()) &&
-                        this.getWriteDate().equals(p.getWriteDate()) &&
-                        this.getBomLines().size() == p.getBomLines().size() &&
-                        this.getBoms().size() == p.getBoms().size() &&
-                        this.getMessageLastPost().equals(p.getMessageLastPost()) &&
-                        this.getActivityDateDeadline().equals(p.getActivityDateDeadline()) &&
-                        this.getWeight().equals(p.getWeight())
-
-                ) {
-            return true;
-        }
-
-        return false;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, defaultCode, active, productTmplId, barcode, volume, weight, messageLastPost, activityDateDeadline, createUid, createDate, writeUid, writeDate, boms, bomLines);
     }
 }
