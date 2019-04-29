@@ -34,6 +34,10 @@ public class ProductRepository {
         return em.createNamedQuery("product.findById", Product.class).setParameter("id", id).getSingleResult();
     }
 
+    public List<Product> findByDefaultCode(String defaultCode) throws Exception {
+        return em.createNamedQuery("product.findByDefaultCode", Product.class).setParameter("id", defaultCode).getResultList();
+    }
+
     /**
      * Write a BillOfMaterial to the database
      * @param billOfMaterial that has to be saved on the database

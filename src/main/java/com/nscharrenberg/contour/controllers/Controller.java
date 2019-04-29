@@ -117,22 +117,23 @@ public class Controller implements Initializable {
                     String text = idTxt.getText();
                     String formatted = text.replaceAll(" ", "");
 
-                    if(!formatted.equals("*") || !formatted.equals("0")) {
-                        products = new ArrayList<>();
-                        try {
-                            products.add(pr.findById(Integer.parseInt(formatted)));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
-                        }
-                    } else {
+                    if(formatted.equals("*")) {
                         try {
                             products = pr.findAll();
                         } catch (Exception e) {
                             e.printStackTrace();
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
+                    } else {
+                        products = new ArrayList<>();
+                        try {
+                            products.addAll(pr.findByDefaultCode(text));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
+                        }
                     }
+
                     List<Product> newProducts = populate(products);
                     TreeItem result = populateTreeView(newProducts);
 
@@ -333,13 +334,13 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         disableAfterLoading();
 
-        idTxt.setTextFormatter(new TextFormatter<Object>(c -> {
-            if(!c.getControlNewText().matches("^$|^[0-9*]+$")) {
-                return null;
-            } else {
-                return c;
-            }
-        }));
+//        idTxt.setTextFormatter(new TextFormatter<Object>(c -> {
+//            if(!c.getControlNewText().matches("^$|^[0-9*]+$")) {
+//                return null;
+//            } else {
+//                return c;
+//            }
+//        }));
     }
 
     /**

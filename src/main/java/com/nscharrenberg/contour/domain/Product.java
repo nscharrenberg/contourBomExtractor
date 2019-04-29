@@ -12,7 +12,8 @@ import java.util.Set;
 @Table(name = "product_product")
 @NamedQueries({
         @NamedQuery(name = "product.findAll", query = "SELECT p FROM Product p ORDER BY p.id ASC"),
-        @NamedQuery(name = "product.findById", query = "SELECT p FROM Product p WHERE p.id = :id ORDER BY p.id ASC")
+        @NamedQuery(name = "product.findById", query = "SELECT p FROM Product p WHERE p.id = :id ORDER BY p.id ASC"),
+        @NamedQuery(name = "product.findByDefaultCode", query = "SELECT p FROM Product p WHERE p.defaultCode = :id ORDER BY p.defaultCode ASC")
 })
 public class Product extends RecursiveTreeObject<Product> {
     @Id
