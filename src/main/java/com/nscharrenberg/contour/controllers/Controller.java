@@ -121,6 +121,18 @@ public class Controller implements Initializable {
                     if(formatted.equals("*")) {
                         try {
                             templates = pr.findAll();
+
+                            if(templates.size() > 0) {
+                                TreeItem result = populateTreeView(templates);
+
+                                Platform.runLater(() -> {
+                                    messageList.setRoot(result);
+                                });
+
+                                runLaterSuccessDialog("Success", "Execution passed", "Information has been imported!");
+                            } else {
+                                runLaterSuccessDialog("Warning", "No results found", "No results have been found.");
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
@@ -129,17 +141,22 @@ public class Controller implements Initializable {
                         templates = new ArrayList<>();
                         try {
                             templates.addAll(pr.findByDefaultCode(text));
+                            if(templates.size() > 0) {
+                                TreeItem result = populateTreeView(templates);
+
+                                Platform.runLater(() -> {
+                                    messageList.setRoot(result);
+                                });
+
+                                runLaterSuccessDialog("Success", "Execution passed", "Information has been imported!");
+                            } else {
+                                runLaterSuccessDialog("Warning", "No results found", String.format("We could not find any results with the value %s", text));
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
                     }
-
-                    TreeItem result = populateTreeView(templates);
-
-                    Platform.runLater(() -> {
-                        messageList.setRoot(result);
-                    });
 
                     return null;
                 }
@@ -149,12 +166,10 @@ public class Controller implements Initializable {
         } finally {
             loadTask.setOnSucceeded(e -> {
                 disableProgressBar();
-                runLaterSuccessDialog("Success", "Execution passed", "Information has been imported!");
             });
 
             loadTask.setOnFailed(e -> {
                 disableProgressBar();
-                runLaterSuccessDialog("Failed", "Execution failed", "The task to import the bom information has failed");
             });
 
             loadTask.setOnCancelled(e -> {
@@ -175,23 +190,6 @@ public class Controller implements Initializable {
 
     public Controller() {
         pr = new TemplateRepository();
-    }
-
-    /**
-     * Preload Boms from BomLines into product Bom.
-     * This makes it easier to organize it lateron when exporting or showing on a Treeview or List.
-     * @param products the list of templates
-     * @return an updated list of templates
-     */
-    private List<Template> populate(List<Template> products) {
-        try {
-            return products;
-        } catch(Exception e) {
-            e.printStackTrace();
-            runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
-        }
-
-        return null;
     }
 
     /**
@@ -260,14 +258,6 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         disableAfterLoading();
-
-//        idTxt.setTextFormatter(new TextFormatter<Object>(c -> {
-//            if(!c.getControlNewText().matches("^$|^[0-9*]+$")) {
-//                return null;
-//            } else {
-//                return c;
-//            }
-//        }));
     }
 
     /**
@@ -346,76 +336,6 @@ public class Controller implements Initializable {
             e.printStackTrace();
         }
     }
-
-//    private void createBillOfMaterial(List<Product> products) {
-//        try {
-//            // All Products
-//            products.forEach(p -> {
-//                // Boms of the Product
-//                if(p.getBoms().size() > 0) {
-//                    p.getBoms().forEach(b -> {
-//                        if(b.getBomLines().size() > 0) {
-//                            BomLine fbl = Iterables.tryFind(p.getBomLines(), new Predicate<BomLine>() {
-//                                @Override
-//                                public boolean apply(@Nullable BomLine input) {
-//                                    if(b.getBomLines().contains(input)) {
-//                                        return true;
-//                                    }
-//
-//                                    return false;
-//                                }
-//                            }).orNull();
-//
-//                            if(fbl == null) {
-//                                BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                                billOfMaterial = populateProduct(billOfMaterial, p);
-//                                billOfMaterial = populateBom(billOfMaterial, b);
-//
-//                                System.out.println(billOfMaterial.toString());
-//                                try {
-//                                    pr.createBillOfMaterial(billOfMaterial);
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                    runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                                }
-//                            }
-//
-//                            b.getBomLines().forEach(bl -> {
-//                                if(bl.getBom().equals(b) && bl.getProduct().getId().equals(p.getId())) {
-//                                    BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                                    billOfMaterial = populateProduct(billOfMaterial, p);
-//                                    billOfMaterial = populateBom(billOfMaterial, b);
-//                                    billOfMaterial = populateBomLine(billOfMaterial, bl);
-//
-//                                    System.out.println(billOfMaterial.toString());
-//                                    try {
-//                                        pr.createBillOfMaterial(billOfMaterial);
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                        runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                                    }
-//                                }
-//                            });
-//                        } else {
-//                            BillOfMaterial billOfMaterial = new BillOfMaterial();
-//                            billOfMaterial = populateProduct(billOfMaterial, p);
-//                            billOfMaterial = populateBom(billOfMaterial, b);
-//
-//                            System.out.println(billOfMaterial.toString());
-//                            try {
-//                                pr.createBillOfMaterial(billOfMaterial);
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                                runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
-//                            }
-//                        }
-//                    });
-//                }
-//            });
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     /**
      * Populate the Template part of the Bill Of Material

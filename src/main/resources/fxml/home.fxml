@@ -24,7 +24,7 @@
                      <children>
                         <AnchorPane prefHeight="25.0" prefWidth="197.0">
                            <children>
-                              <Label text="Search ID: (* = all)" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                              <Label text="Search Default Code: (* = all)" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
                            </children>
                         </AnchorPane>
                         <AnchorPane maxWidth="1.7976931348623157E308" prefHeight="27.0" prefWidth="1112.0">
