@@ -2,6 +2,8 @@ package com.nscharrenberg.contour.repositories;
 
 import com.nscharrenberg.contour.domain.BillOfMaterial;
 import com.nscharrenberg.contour.domain.Bom;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -13,9 +15,14 @@ public class BomRepository {
     private EntityManagerFactory emf;
     private EntityManager em;
 
+    private static final Logger LOGGER = LogManager.getLogger("ContourBomExporter");
+
     public BomRepository() {
         this.emf = Persistence.createEntityManagerFactory("contourDB");
+        LOGGER.info("Entity Manager Factory has been created with persistenceUnitName: contourDB");
+
         this.em = emf.createEntityManager();
+        LOGGER.info("Entity Manager has been created");
     }
 
     /**
@@ -44,12 +51,20 @@ public class BomRepository {
      * @param billOfMaterial that has to be saved on the database
      */
     public void createBillOfMaterial(BillOfMaterial billOfMaterial) throws Exception {
-        em.getTransaction().begin();
+        if(!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+            LOGGER.info("Entitymanager Transaction activated during creation of BillOfMaterial");
+        }
+
         if(!em.contains(billOfMaterial)) {
             em.persist(billOfMaterial);
+            LOGGER.info("Bom persisted");
+
             em.flush();
+            LOGGER.info("Bom Flushed");
         }
 
         em.getTransaction().commit();
+        LOGGER.info("Bom Transaction Committed");
     }
 }

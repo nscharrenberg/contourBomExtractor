@@ -7,14 +7,21 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TemplateRepository {
     private EntityManagerFactory emf;
     private EntityManager em;
 
+    private static final Logger LOGGER = LogManager.getLogger("ContourBomExporter");
+
     public TemplateRepository() {
         this.emf = Persistence.createEntityManagerFactory("contourDB");
+        LOGGER.info("Entity Manager Factory has been created with persistenceUnitName: contourDB");
+
         this.em = emf.createEntityManager();
+        LOGGER.info("Entity Manager has been created");
     }
 
     /**
@@ -43,12 +50,20 @@ public class TemplateRepository {
      * @param billOfMaterial that has to be saved on the database
      */
     public void createBillOfMaterial(BillOfMaterial billOfMaterial) throws Exception {
-        em.getTransaction().begin();
+        if(!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+            LOGGER.info("Entitymanager Transaction activated during creation of BillOfMaterial");
+        }
+
         if(!em.contains(billOfMaterial)) {
             em.persist(billOfMaterial);
+            LOGGER.info("BillOfMaterial persisted");
+
             em.flush();
+            LOGGER.info("BillOfMaterial Flushed");
         }
 
         em.getTransaction().commit();
+        LOGGER.info("BillOfMaterial Transaction Committed");
     }
 }

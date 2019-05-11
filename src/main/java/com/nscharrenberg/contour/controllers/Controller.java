@@ -1,12 +1,8 @@
 package com.nscharrenberg.contour.controllers;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.nscharrenberg.contour.domain.*;
-import com.nscharrenberg.contour.repositories.BomRepository;
-import com.nscharrenberg.contour.repositories.ProductRepository;
 import com.nscharrenberg.contour.repositories.TemplateRepository;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -19,8 +15,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.IntStream;
 
 public class Controller implements Initializable {
 
@@ -59,9 +55,12 @@ public class Controller implements Initializable {
 
     private List<Template> templates;
 
+    private static final Logger LOGGER = LogManager.getLogger("ContourBomExporter");
+
     @FXML
     void exportEverythingAction(ActionEvent event) {
-        enableOnLoading("Creating Excel file... This may take a few minutes");
+        LOGGER.info("Starting to export data");
+        enableOnLoading("Exporting to the database... This may take a few minutes");
 
         if(this.templates != null && this.templates.size() > 0) {
             Task<Void> loadTask = new Task<Void>() {
@@ -74,16 +73,19 @@ public class Controller implements Initializable {
 
             loadTask.setOnSucceeded(e -> {
                 disableProgressBar();
+                LOGGER.info("The BillOfMaterial Creation has succeeded");
                 runLaterSuccessDialog("Success", "Execution passed", "The Bill of Materials have been saved");
             });
 
             loadTask.setOnFailed(e -> {
                 disableProgressBar();
+                LOGGER.info("The BillOfMaterial Creation has failed");
                 runLaterSuccessDialog("Failed", "Execution failed", "The task to save the bill of materials has failed");
             });
 
             loadTask.setOnCancelled(e -> {
                 disableProgressBar();
+                LOGGER.info("The BillOfMaterial Creation has been cancelled");
                 runLaterSuccessDialog("Cancelled", "Execution cancelled", "The task to save the bill of materials has been cancelled");
             });
 
@@ -92,6 +94,7 @@ public class Controller implements Initializable {
             thread.start();
         } else {
             runLaterSuccessDialog("Warning", "Nothing to export", "There is no information to export.");
+            LOGGER.info("There is no information to export");
         }
     }
 
@@ -109,6 +112,7 @@ public class Controller implements Initializable {
     @FXML
     void importEverythingAction(ActionEvent event) {
         enableOnLoading("Loading... This may take a few minutes");
+        LOGGER.error("TEST");
 
         Task<Void> loadTask = null;
         try {
@@ -135,6 +139,7 @@ public class Controller implements Initializable {
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
+                            LOGGER.error("Exception while populating treeView on ALL", e);
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
                     } else {
@@ -154,6 +159,7 @@ public class Controller implements Initializable {
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
+                            LOGGER.error("Exception while populating treeView on specific product", e);
                             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
                         }
                     }
@@ -163,17 +169,21 @@ public class Controller implements Initializable {
             };
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.error("Exception during the import of the bom information", e);
         } finally {
             loadTask.setOnSucceeded(e -> {
                 disableProgressBar();
+                LOGGER.info("The task to import the bom information has succeeded");
             });
 
             loadTask.setOnFailed(e -> {
                 disableProgressBar();
+                LOGGER.info("The task to import the bom information has failed");
             });
 
             loadTask.setOnCancelled(e -> {
                 disableProgressBar();
+                LOGGER.info("The task to import the bom information has been cancelled");
                 runLaterSuccessDialog("Cancelled", "Execution cancelled", "The task to import the bom information has been cancelled");
             });
 
@@ -189,7 +199,13 @@ public class Controller implements Initializable {
     }
 
     public Controller() {
-        pr = new TemplateRepository();
+        try {
+            pr = new TemplateRepository();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("Unable to instantiate TemplateRepository", e);
+            runLateDisplayDialog("Something went wrong", "Unable to instantiate Application", e);
+        }
     }
 
     /**
@@ -233,6 +249,7 @@ public class Controller implements Initializable {
             return rootItem;
         } catch (Exception e){
             e.printStackTrace();
+            LOGGER.error("Exception during tree population", e);
             runLateDisplayDialog("Something went wrong", "Error while populating TreeView", e);
         }
 
@@ -279,6 +296,8 @@ public class Controller implements Initializable {
         this.exportBtn.setDisable(true);
         this.progressLbl.setVisible(true);
         this.progressBar.setVisible(true);
+
+        LOGGER.info("import, export & progressbar buttons and progressLabel are enabled");
     }
 
     /**
@@ -290,6 +309,8 @@ public class Controller implements Initializable {
         this.exportBtn.setDisable(false);
         this.progressLbl.setVisible(false);
         this.progressBar.setVisible(false);
+
+        LOGGER.info("import, export & progressbar buttons and progressLabel are disabled");
     }
 
     private void createBillofMaterial(List<Template> templates) {
@@ -308,12 +329,12 @@ public class Controller implements Initializable {
                                 billOfMaterial = populateBom(billOfMaterial, b);
                                 billOfMaterial = populateBomLine(billOfMaterial, bl);
 
-                                System.out.println(billOfMaterial.toString());
                                 try {
                                     pr.createBillOfMaterial(billOfMaterial);
+                                    LOGGER.info("BillOfMaterial Created with BomLines");
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
+                                    LOGGER.error("Exception during BillOfMaterial Creation with BomLines", e);
                                 }
                             });
                         } else {
@@ -321,12 +342,12 @@ public class Controller implements Initializable {
                             billOfMaterial = populateTemplate(billOfMaterial, t);
                             billOfMaterial = populateBom(billOfMaterial, b);
 
-                            System.out.println(billOfMaterial.toString());
                             try {
                                 pr.createBillOfMaterial(billOfMaterial);
+                                LOGGER.info("BillOfMaterial Created without BomLines");
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                runLateDisplayDialog("Something went wrong", "Error while creating Bill of Material", e);
+                                LOGGER.error("Exception during BillOfMaterial Creation without BomLines", e);
                             }
                         }
                     });
@@ -344,6 +365,7 @@ public class Controller implements Initializable {
      * @return the populated billOfMaterial
      */
     private BillOfMaterial populateTemplate(BillOfMaterial billOfMaterial, Template t) {
+        LOGGER.info("Populating Template into BillOfMaterial Object");
         billOfMaterial.setTemplate_id(t.getId());
         billOfMaterial.setTemplate_name(t.getName());
         billOfMaterial.setTemplate_sequence(t.getSequence());
@@ -388,6 +410,7 @@ public class Controller implements Initializable {
         billOfMaterial.setTemplate_expensePolicy(t.getExpensePolicy());
         billOfMaterial.setTemplate_invoicePolicy(t.getInvoicePolicy());
         billOfMaterial.setTemplate_serviceTracking(t.getServiceTracking());
+        LOGGER.info("Template succesfully added to BillOfMaterial Object");
 
         return billOfMaterial;
     }
@@ -399,6 +422,7 @@ public class Controller implements Initializable {
      * @return the populated BillOfMaterial
      */
     private BillOfMaterial populateProduct(BillOfMaterial billOfMaterial, Product p) {
+        LOGGER.info("Populating Product into BillOfMaterial Object");
         billOfMaterial.setProduct_id(p.getId());
         billOfMaterial.setProduct_defaultCode(p.getDefaultCode());
         billOfMaterial.setProduct_active(p.isActive());
@@ -411,6 +435,7 @@ public class Controller implements Initializable {
         billOfMaterial.setProduct_createDate(p.getCreateDate());
         billOfMaterial.setProduct_writeUid(p.getWriteUid());
         billOfMaterial.setProduct_writeDate(p.getWriteDate());
+        LOGGER.info("Product succesfully added to BillOfMaterial Object");
 
         return billOfMaterial;
     }
@@ -422,6 +447,7 @@ public class Controller implements Initializable {
      * @return the populated BillOfMaterial
      */
     private BillOfMaterial populateBom(BillOfMaterial billOfMaterial, Bom b) {
+        LOGGER.info("Populating Bom into BillOfMaterial Object");
         billOfMaterial.setBom_id(b.getId());
         billOfMaterial.setBom_code(b.getCode());
         billOfMaterial.setBom_active(b.isActive());
@@ -438,6 +464,7 @@ public class Controller implements Initializable {
         billOfMaterial.setBom_createDate(b.getCreateDate());
         billOfMaterial.setBom_writeUid(b.getWriteUid());
         billOfMaterial.setBom_writeDate(b.getWriteDate());
+        LOGGER.info("Bom succesfully added to BillOfMaterial Object");
 
         return billOfMaterial;
     }
@@ -449,6 +476,7 @@ public class Controller implements Initializable {
      * @return the populated BillOfMaterial
      */
     private BillOfMaterial populateBomLine(BillOfMaterial billOfMaterial, BomLine bl) {
+        LOGGER.info("Populating BomLines into BillOfMaterial Object");
         billOfMaterial.setBomline_id(bl.getId());
         billOfMaterial.setBomline_productQty(bl.getProductQty());
         billOfMaterial.setBomline_productUomId(bl.getProductUomId());
@@ -459,6 +487,7 @@ public class Controller implements Initializable {
         billOfMaterial.setBomline_createDate(bl.getCreateDate());
         billOfMaterial.setBomline_writeUid(bl.getWriteUid());
         billOfMaterial.setBomline_writeDate(bl.getWriteDate());
+        LOGGER.info("BomLines succesfully added to BillOfMaterial Object");
 
         return billOfMaterial;
     }
@@ -502,6 +531,7 @@ public class Controller implements Initializable {
         alert.getDialogPane().setExpandableContent(expContent);
 
         alert.showAndWait();
+        LOGGER.info("ErrorDialog Opened");
     }
 
     /**
@@ -530,6 +560,7 @@ public class Controller implements Initializable {
         alert.setContentText(content);
 
         alert.showAndWait();
+        LOGGER.info("SuccessDialog Opened");
     }
 
     /**
